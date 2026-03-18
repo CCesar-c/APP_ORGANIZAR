@@ -1,13 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaViewBase } from 'react-native';
+import { createDrawerNavigator } from '@react-navigation/drawer'
+
+const Drawer = createDrawerNavigator();
 
 export default function App() {
+  <Drawer.Navigator>
+    <Drawer.Screen name="Home" component={inicio} />
+  </Drawer.Navigator>
+}
+
+function inicio() {
   return (
-  <View style={styles.container}>
-      <Text>ORGANIZADOR!</Text>
+    <SafeAreaViewBase style={styles.container}>
+      <Text>Home Screen</Text>
+      
       <StatusBar style="auto" />
-    </View>
-  );
+    </SafeAreaViewBase>
+  )
 }
 
 const styles = StyleSheet.create({
