@@ -1,30 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaViewBase } from 'react-native';
 import { createDrawerNavigator } from '@react-navigation/drawer'
-
+import { NavigationContainer } from '@react-navigation/native';
+import { Inicio, Crear_tareas } from './screens';
 const Drawer = createDrawerNavigator();
 
 export default function App() {
-  <Drawer.Navigator>
-    <Drawer.Screen name="Home" component={inicio} />
-  </Drawer.Navigator>
-}
-
-function inicio() {
   return (
-    <SafeAreaViewBase style={styles.container}>
-      <Text>Home Screen</Text>
-      
-      <StatusBar style="auto" />
-    </SafeAreaViewBase>
+    <NavigationContainer>
+      <Drawer.Navigator>
+        <Drawer.Screen name="Inicio" component={Inicio} />
+        <Drawer.Screen name="Crear tareas" component={Crear_tareas} />
+      </Drawer.Navigator>
+    </NavigationContainer>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
