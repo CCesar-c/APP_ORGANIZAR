@@ -1,12 +1,22 @@
 import { Text, View, TextInput } from 'react-native';
+import Asyncs from '@react-native-async-storage/async-storage';
 import { container, titulo } from './estilo'
 import { Boton } from './componentes';
 import { useState } from 'react';
 function Inicio() {
+    const [datos, setdatos] = useState([]);
+    setdatos(Object.keys(Asyncs.getAllKeys()));
     return (
         <View style={container}>
             <Text style={titulo}>Cosas Pendientes</Text>
             <View style={{ borderColor: "black", borderWidth: 1, width: "100%", height: "100%" }}>
+                {datos.map((item) => {
+                    return (
+                        <View key={item} style={{ borderColor: "black", borderWidth: 1, width: "100%", height: "auto", padding: 10 }}>
+                            <Text>{item}</Text>
+                        </View>
+                    )
+                    })}
                 <Text>Empty</Text>
             </View>
         </View>
@@ -18,10 +28,18 @@ function Crear_tareas() {
     const [nc, setnc] = useState(false);
     const [nome, setnome] = useState('');
     const [descripcion, setdescripcion] = useState('');
-    var json_info = JSON.stringify({
-        "nome": nome,
-        "descripcion": descripcion
-    })
+
+    async function guardar_tarea() {
+        var json_info = JSON.stringify({
+            "nome": nome,
+            "descripcion": descripcion,
+            "manana": mnn,
+            "tarde": td,
+            "noche": nc,
+            "feita": false
+        })
+        await Asyncs.setItem(nome, json_info);
+    }
 
     return (
         <View style={container}>
