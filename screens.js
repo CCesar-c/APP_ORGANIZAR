@@ -1,62 +1,259 @@
-import { Text, View, TextInput } from 'react-native';
-import Asyncs from '@react-native-async-storage/async-storage';
-import { container, titulo } from './estilo'
-import { Boton } from './componentes';
-import { useState } from 'react';
+import {
+  Text,
+  View,
+  TextInput
+} from "react-native";
+import * as Notifications from 'expo-notifications';
+import {
+  Platform
+} from 'react-native';
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  container,
+  titulo
+} from "./estilo";
+import {
+  Boton
+} from "./componentes";
+import {
+  useState,
+  useEffect
+} from "react";
 function Inicio() {
-    const [datos, setdatos] = useState([]);
-    setdatos(Object.keys(Asyncs.getAllKeys()));
-    return (
-        <View style={container}>
-            <Text style={titulo}>Cosas Pendientes</Text>
-            <View style={{ borderColor: "black", borderWidth: 1, width: "100%", height: "100%" }}>
-                {datos.map((item) => {
-                    return (
-                        <View key={item} style={{ borderColor: "black", borderWidth: 1, width: "100%", height: "auto", padding: 10 }}>
-                            <Text>{item}</Text>
-                        </View>
-                    )
-                    })}
-                <Text>Empty</Text>
-            </View>
-        </View>
-    )
-}
-function Crear_tareas() {
-    const [mnn, setmnn] = useState(false);
-    const [td, settd] = useState(false);
-    const [nc, setnc] = useState(false);
-    const [nome, setnome] = useState('');
-    const [descripcion, setdescripcion] = useState('');
+  const [datos,
+    setdatos] = useState([]);
 
-    async function guardar_tarea() {
-        var json_info = JSON.stringify({
-            "nome": nome,
-            "descripcion": descripcion,
-            "manana": mnn,
-            "tarde": td,
-            "noche": nc,
-            "feita": false
-        })
-        await Asyncs.setItem(nome, json_info);
+  const obtenerTareas = async () => {
+    // await AsyncStorage.clear()
+    try {
+      const all_keys = await AsyncStorage.getAllKeys();
+      const all_tareas = [];
+
+      for (let i = 0; i < all_keys.length; i++) {
+        const res = await AsyncStorage.getItem(all_keys[i]);
+        if (res) all_tareas.push(JSON.parse(res));
+      }
+      setdatos(all_tareas);
+    } catch (e) {
+      console.error("Error al leer la memoria", e);
     }
+  };
 
-    return (
-        <View style={container}>
-            <Text style={titulo}>Crea una tarea</Text>
-            <View style={[container, { height: "auto", width: "auto", gap: 10 }]}>
-                <TextInput placeholder='nombre de la tarea' />
-                <TextInput placeholder='descripcion' />
-                {/* no se te olvide de la logica de marca si ya fue echa la tarea */}
-                <Boton onPress={() => { setmnn(!mnn) }} >{`manana?${mnn ? "✅" : "❌"}`}</Boton>
+  useEffect(() => {
+    obtenerTareas();
+  }, []);
+  // deletar item
+  async function deleteItem(i) {
+    const list = [...datos];
+    await AsyncStorage.removeItem(`${list[i].nome}`);
+    list.splice(i, 1);
+    setdatos(list);
 
-                <Boton onPress={() => { settd(!td) }} >{`tarde?${td ? "✅" : "❌"}`}</Boton>
+    const lista_json = JSON.stringify(list);
+    console.log(lista_json);
+  }
+  // Función para cambiar el estado de ✅ a ❌
+  async function changeState(i) {
+    try {
+      // 1. Clonamos la lista actual para no modificar el original directamente
+      const nuevaLista = [...datos];
 
-                <Boton onPress={() => { setnc(!nc) }} >{`noche?${nc ? "✅" : "❌"}`}</Boton>
-                <Boton>Crear tarea</Boton>
+      // 2. Cambiamos solo la propiedad 'feita' de la tarea que tocamos
+      nuevaLista[i].feita = !nuevaLista[i].feita;
+
+      // 3. Actualizamos el estado con la LISTA COMPLETA, no solo con un booleano
+      setdatos(nuevaLista);
+      const lista_json = JSON.stringify(nuevaLista[i]);
+      console.log(lista_json);
+      await AsyncStorage.setItem(`${nuevaLista[i].nome}`, lista_json);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  return (
+    <View style={container}>
+      <Text style={titulo}>Cosas Por Hacer</Text>
+      <View
+        style={ {
+          borderColor: "black",
+          borderWidth: 1,
+          width: "100%",
+          flex: 1
+        }}
+        >
+        {datos &&
+        datos.map((item, index) => (
+          <View
+            key={index}
+            style={ {
+              borderWidth: 1,
+              borderColor: "black",
+              margin: 5,
+              padding: 10
+
+            }}
+            >
+            <View
+              style={ {
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 10
+              }}
+              >
+              <Boton
+                onPress={() =>
+                alert(
+                  "descripcion: " + item.descripcion
+                )
+                }
+                >
+                {"Nome: " + item.nome}
+              </Boton>
+              <Boton
+                onPress={() => {
+                  changeState(index);
+                }}
+                >
+                {`Esta echa? ${item.feita ? "✅": "❌"}`}
+              </Boton>
+              <Boton onPress={() => deleteItem(index)}>
+                delete
+              </Boton>
             </View>
-        </View>
-    )
+            <Text style={ { fontSize: 10 }}>{
+              "fecha: " + item.fecha}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
 }
 
-export { Inicio, Crear_tareas };
+function Crear_tareas() {
+  const [mnn,
+    setmnn] = useState(false);
+  const [td,
+    settd] = useState(false);
+  const [nc,
+    setnc] = useState(false);
+  const [nome,
+    setnome] = useState("");
+  const [descripcion,
+    setdescripcion] = useState("");
+
+  // 1. Configuramos cómo se ven las notificaciones cuando la app está abierta
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      // ❌ Antes: shouldShowAlert: true
+      // ✅ Ahora:
+      shouldShowBanner: true, // Muestra el cartelito flotante arriba
+      shouldShowList: true, // Muestra la notificación en la cortina de notificaciones
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
+
+  async function guardar_notifications() {
+    try {
+      // 1. Aseguramos que el canal exista (Crucial para Android)
+      if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('tareas-canal', {
+          name: 'Recordatorios de Tareas',
+          importance: Notifications.AndroidImportance.MAX,
+        });
+      }
+
+      // 2. Programamos la notificación con el Trigger EXACTO
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "¡Oye Cesar!",
+          body: "Ya pasaron los 5 segundos de la tarea",
+          android: {
+            channelId: 'tareas-canal', // <--- Primera mención del canal
+          },
+        },
+        // El secreto está en no dejar el trigger como un objeto genérico
+        trigger: {
+          seconds: 5,
+          channelId: 'tareas-canal', // <--- Segunda mención (algunas versiones lo piden aquí)
+        },
+      });
+
+      console.log("✅ Notificación programada correctamente");
+    } catch (error) {
+      console.error("❌ Error al programar:", error);
+    }
+  }
+
+  async function guardar_tarea() {
+    try {
+      var json_info = JSON.stringify({
+        nome: nome,
+        descripcion: descripcion,
+        manana: mnn,
+        tarde: td,
+        noche: nc,
+        fecha: new Date().toLocaleDateString("es-ES"),
+        feita: false
+      });
+      await AsyncStorage.setItem(`${nome}`, json_info);
+      console.log(json_info);
+    } catch (e) {
+      console.error(e);
+    }
+    // await AsyncStorage.setItem("hello", json_info)
+  }
+
+  return (
+    <View style={[container,{badgroundColor:"black"}]}>
+      <Text style={titulo}>Crea una tarea</Text>
+      <View
+        style={[container, { height: "auto", width: "auto", gap: 10 }]}
+        >
+        <TextInput
+          placeholder='nombre de la tarea'
+          onChangeText={texto => setnome(texto)}
+          />
+        <TextInput
+          placeholder='descripcion'
+          onChangeText={texto => setdescripcion(texto)}
+          />
+        {/* no se te olvide de la logica de marca si ya fue echa la tarea */}
+        <Boton
+          onPress={() => {
+            setmnn(!mnn);
+          }}
+          >{`manana?${mnn ? "✅": "❌"}`}</Boton>
+
+        <Boton
+          onPress={() => {
+            settd(!td);
+          }}
+          >{`tarde?${td ? "✅": "❌"}`}</Boton>
+
+        <Boton
+          onPress={() => {
+            setnc(!nc);
+          }}
+          >{`noche?${nc ? "✅": "❌"}`}</Boton>
+        <Boton
+          onPress={() => {
+            guardar_notifications()
+            guardar_tarea();
+          }}
+          >
+          Crear tarea
+        </Boton>
+      </View>
+    </View>
+  );
+}
+
+export {
+  Inicio,
+  Crear_tareas
+};
