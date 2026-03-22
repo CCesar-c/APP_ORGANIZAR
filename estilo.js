@@ -1,4 +1,12 @@
-import { StyleSheet } from "react-native"
+
+const inputs = {
+
+    color: "black",
+    height: 30,
+    borderRadius: 5,
+    borderColor: "black",
+    borderWidth: 1
+}
 
 const titulo = {
     fontSize: 30,
@@ -20,4 +28,4 @@ const container = {
     // justifyContent: 'center',
 }
 
-export { titulo, boton, container }
+export { titulo, boton, container, inputs }
