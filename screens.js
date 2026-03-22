@@ -33,10 +33,11 @@ function Inicio() {
     try {
       var todas_tareas = await AsyncStorage.getItem("stacks")
       console.log(todas_tareas)
-      if (todas_tareas == "null") {
+      var novaLista = JSON.parse(todas_tareas)
+      if (novaLista == "null" || novaLista == null) {
         return;
       } else {
-        var novaLista = Array(JSON.parse(todas_tareas))
+
         console.log(novaLista)
         setdatos(novaLista)
 
@@ -97,7 +98,7 @@ function Inicio() {
           // })
           datos &&
           datos.map((item, index) => (
-            console.log(item),
+            // console.log(item),
             <View
               key={index}
               style={{
@@ -146,6 +147,7 @@ function Inicio() {
 }
 
 function Crear_tareas() {
+  const [tareas, settareas] = useState([])
   const [mnn,
     setmnn] = useState(false);
   const [td,
@@ -206,9 +208,10 @@ function Crear_tareas() {
   }
 
   async function guardar_tarea() {
-    var tareas_anteriores = Array([])
+
     try {
-      var json_info = {
+      // 1. Creamos el objeto de la nueva tarea
+      const nueva_tarea = {
         nome: nome,
         descripcion: descripcion,
         manana: mnn,
@@ -218,18 +221,30 @@ function Crear_tareas() {
         feita: false
       };
 
-      tareas_anteriores = await AsyncStorage.getItem("stacks")
-      console.log(tareas_anteriores)
-      if (tareas_anteriores == "null") {
-        await AsyncStorage.setItem(`stacks`, JSON.stringify(json_info));
-        console.log(json_info);
+      // 2. Leemos lo que ya existe en "stacks"
+      const resultado = await AsyncStorage.getItem("stacks");
+
+      // 3. Preparamos la lista final
+      let lista_actualizada = [];
+
+      if (resultado !== null) {
+        // Si ya hay tareas, las parseamos y agregamos la nueva
+        const tareas_previas = JSON.parse(resultado);
+        lista_actualizada = [...tareas_previas, nueva_tarea];
       } else {
-        tareas_anteriores.push(json_info)
-        await AsyncStorage.setItem(`stacks`, JSON.stringify(tareas_anteriores));
-        console.log(tareas_anteriores);
+        // Si es la primera vez, la lista solo tiene la nueva tarea
+        lista_actualizada = [nueva_tarea];
       }
+
+      // 4. GUARDADO CRUCIAL: Guardamos la "lista_actualizada", NO el estado
+      await AsyncStorage.setItem("stacks", JSON.stringify(lista_actualizada));
+
+      // 5. Actualizamos el estado para que se vea en la pantalla (Inicio)
+
+      console.log("✅ Guardado con éxito:", lista_actualizada);
+
     } catch (e) {
-      console.error(e);
+      console.error("❌ Error al guardar:", e);
     }
     // await AsyncStorage.setItem("hello", json_info)
   }
