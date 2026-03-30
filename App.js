@@ -1,6 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { NavigationContainer } from '@react-navigation/native';
-import { Inicio, Crear_tareas } from './screens';
+import { Inicio, Crear_tareas, Opciones} from './screens';
 const Drawer = createDrawerNavigator();
 
 export default function App() {
@@ -9,6 +9,7 @@ export default function App() {
       <Drawer.Navigator>
         <Drawer.Screen name="Inicio" component={Inicio} />
         <Drawer.Screen name="Crear tareas" component={Crear_tareas} />
+        <Drawer.Screen name="Opciones" component={Opciones} />
       </Drawer.Navigator>
     </NavigationContainer>
   )

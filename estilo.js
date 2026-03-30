@@ -1,8 +1,13 @@
 
 const inputs = {
-
-    color: "black",
-    height: 30,
+    backgroundColor:"black",
+    color: "white",
+    width:100,
+    // alingContent:"center",
+    // fontWeight:1000,
+    // alignItems:"center",
+    // justifyContent:"center",
+    height: 50,
     borderRadius: 5,
     borderColor: "black",
     borderWidth: 1
@@ -17,7 +22,8 @@ const boton = {
     height: 50,
     with: 100,
     borderColor: "black",
-    color: "black",
+    backgroundColor:"black",
+    color: "white",
     borderWidth: 1
 }
 
