@@ -463,7 +463,7 @@ function Crear_tareas() {
     setSaving(true);
     try {
       if (Platform.OS === "android" && Notifications) {
-        for (let i = 0; i < horas.length; i++) {
+        for (let i = 0; i < horas.length; i++) { 
           var id_temporal = await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria",
