@@ -467,7 +467,7 @@ function Crear_tareas() {
           var id_temporal = await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria",
-              body: `Es hora de: ${nome}`,
+              body: `Es hora de: ${nome} ${mnn ? "(Mañana) " : ""}${td ? "(Tarde) " : ""}${nc ? "(Noche)" : ""}`,
               android: {
                 channelId: "tareas-canal",
                 sound: true,
