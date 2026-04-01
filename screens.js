@@ -314,6 +314,7 @@ function Inicio() {
           }
           );
           console.log(n)
+          console.log(n.identifier)
           if (n) {
             await Notifications.cancelScheduledNotificationAsync(n.identifier);
           }
