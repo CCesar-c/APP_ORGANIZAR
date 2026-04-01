@@ -47,7 +47,7 @@ function Inicio() {
       // console.log(  await Notifications.getAllScheduledNotificationsAsync())
       // await Notifications.cancelAllScheduledNotificationsAsync();
       if (Platform.OS == "android") {
-        console.log(await Notifications.getAllScheduledNotificationsAsync())
+         // console.log(await Notifications.getAllScheduledNotificationsAsync())
       }
       const cargar_horas = JSON.parse(await AsyncStorage.getItem("cargar_horas"));
       const cargar_minutos = JSON.parse(await AsyncStorage.getItem("cargar_minutos"));
@@ -62,7 +62,7 @@ function Inicio() {
           0];
       }
       var todas_tareas = await AsyncStorage.getItem("stacks");
-      console.log(todas_tareas)
+      // console.log(todas_tareas)
       var novaLista = JSON.parse(todas_tareas);
       if (!novaLista) return;
       setdatos(novaLista);
@@ -87,21 +87,21 @@ function Inicio() {
           await Notifications.getAllScheduledNotificationsAsync();
         for (let j = 0; j < notificaciones_agendadas.length; j++) {
           notificaciones_agendadas.find((no) => {
-            console.log("notificacion" + no.content.body)
+            // console.log("notificacion" + no.content.body)
             let body_string = String(no.content.body);
             var res_str = body_string.split(" ");
-            console.log("res_str " + res_str)
+            // console.log("res_str " + res_str)
             const remove = res_str.slice(0,3)
-            console.log("remove: [" + remove + "]")
-            console.log("nome_tarea: " + nome_tarea)
-            console.log("comparacion: " + (res_str[3] === nome_tarea))
-            borrar_notificaciones.push(res_str[3] === nome_tarea ? no : null)
+            // console.log("remove: [" + remove + "]")
+            // console.log("nome_tarea: " + res_str[3])
+            // console.log("comparacion: " + (res_str[3] == nome_tarea))
+            borrar_notificaciones.push(res_str[3] == nome_tarea ? no : null)
           }
           );
 
           for (let k = 0; k < borrar_notificaciones.length; k++) {
             if (borrar_notificaciones[k] != null) {
-              console.log('borrando' + borrar_notificaciones[k].identifier)
+              // console.log('borrando' + borrar_notificaciones[k].identifier)
               await Notifications.cancelScheduledNotificationAsync(borrar_notificaciones[k].identifier);
             }
           }
