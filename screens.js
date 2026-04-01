@@ -12,7 +12,13 @@ import {
 const Notifications =
   Platform.OS !== "web" ? require("expo-notifications") : null;
 import {
-  Boton
+  Divider,
+  Badge,
+  PrimaryButton,
+  IconButton,
+  StyledInput,
+  SectionHeader,
+  ScreenWrapper
 } from './componentes'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -21,238 +27,7 @@ import {
   useRef
 } from "react";
 
-// ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
-const COLORS = {
-  bg: "#0D0F14",
-  surface: "#161A22",
-  card: "#1C2130",
-  border: "#252C3D",
-  accent: "#C9A84C",
-  accentMuted: "rgba(201,168,76,0.12)",
-  accentSoft: "rgba(201,168,76,0.25)",
-  text: "#E8EAF0",
-  textSecondary: "#8892A4",
-  textMuted: "#4E5668",
-  success: "#2ECC71",
-  successMuted: "rgba(46,204,113,0.12)",
-  danger: "#E74C3C",
-  dangerMuted: "rgba(231,76,60,0.10)",
-  white: "#FFFFFF",
-};
-
-const FONTS = {
-  display: {
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontWeight: "700"
-  },
-  heading: {
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    fontWeight: "600"
-  },
-  body: {
-    fontFamily: Platform.OS === "ios" ? "Helvetica Neue" : "sans-serif"
-  },
-  mono: {
-    fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace"
-  },
-};
-
-// ─── SHARED COMPONENTS ────────────────────────────────────────────────────────
-
-function Divider({
-  style
-}) {
-  return (
-    <View
-      style={[{ height: 1, backgroundColor: COLORS.border, marginVertical: 4 },
-        style,
-      ]}
-    />
-  );
-}
-
-function Badge({
-  label, variant = "default"
-}) {
-  const variants = {
-    default: {
-      bg: COLORS.accentMuted,
-      color: COLORS.accent
-    },
-    success: {
-      bg: COLORS.successMuted,
-      color: COLORS.success
-    },
-    danger: {
-      bg: COLORS.dangerMuted,
-      color: COLORS.danger
-    },
-    muted: {
-      bg: COLORS.border,
-      color: COLORS.textSecondary
-    },
-  };
-  const v = variants[variant] || variants.default;
-  return (
-    <View
-      style={{
-        backgroundColor: v.bg,
-        borderRadius: 4,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-      }}
-    >
-      <Text style={{ color: v.color, fontSize: 11, fontWeight: "700", letterSpacing: 0.8 }}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-function PrimaryButton({
-  onPress, children, icon, variant = "primary", disabled
-}) {
-  const bg =
-    variant === "primary"
-      ? COLORS.accent : variant === "danger"
-        ? COLORS.danger : COLORS.border;
-  const textColor = variant === "ghost" ? COLORS.textSecondary : COLORS.bg;
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      activeOpacity={0.75}
-      style={{
-        backgroundColor: disabled ? COLORS.border : bg,
-        borderRadius: 6,
-        paddingVertical: 12,
-        paddingHorizontal: 18,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        opacity: disabled ? 0.5 : 1,
-      }}
-    >
-      {icon && (
-        <Text style={{ fontSize: 14, color: textColor }}>{icon}</Text>
-      )}
-      <Text
-        style={{
-          color: textColor,
-          fontSize: 13,
-          fontWeight: "700",
-          letterSpacing: 0.5,
-          ...FONTS.body,
-        }}
-      >
-        {children}
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-function IconButton({
-  onPress, icon, variant = "ghost"
-}) {
-  const bg =
-    variant === "danger"
-      ? COLORS.dangerMuted : variant === "success"
-        ? COLORS.successMuted : "transparent";
-  const color =
-    variant === "danger"
-      ? COLORS.danger : variant === "success"
-        ? COLORS.success : COLORS.textSecondary;
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={0.7}
-      style={{
-        backgroundColor: bg,
-        borderRadius: 6,
-        width: 34,
-        height: 34,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text style={{ fontSize: 15, color }}>{icon}</Text>
-    </TouchableOpacity>
-  );
-}
-
-function StyledInput({
-  placeholder, value, onChangeText, keyboardType, maxLength, multiline
-}) {
-  const [focused,
-    setFocused] = useState(false);
-  return (
-    <TextInput
-      placeholder={placeholder}
-      placeholderTextColor={COLORS.textMuted}
-      value={value}
-      onChangeText={onChangeText}
-      keyboardType={keyboardType}
-      maxLength={maxLength}
-      multiline={multiline}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      style={{
-        backgroundColor: COLORS.surface,
-        borderWidth: 1,
-        borderColor: focused ? COLORS.accent : COLORS.border,
-        borderRadius: 6,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        color: COLORS.text,
-        fontSize: 14,
-        ...FONTS.body,
-        minHeight: multiline ? 80 : undefined,
-        textAlignVertical: multiline ? "top" : "center",
-      }}
-    />
-  );
-}
-
-function SectionHeader({
-  title, subtitle
-}) {
-  return (
-    <View style={{ marginBottom: 20 }}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 4 }}>
-        <View style={{ width: 3, height: 22, backgroundColor: COLORS.accent, borderRadius: 2 }} />
-        <Text
-          style={{
-            color: COLORS.text,
-            fontSize: 20,
-            ...FONTS.display,
-            letterSpacing: 0.3,
-          }}
-        >
-          {title}
-        </Text>
-      </View>
-      {subtitle && (
-        <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginLeft: 13, letterSpacing: 0.3 }}>
-          {subtitle}
-        </Text>
-      )}
-    </View>
-  );
-}
-
-function ScreenWrapper({
-  children
-}) {
-  return (
-    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
-      {children}
-    </View>
-  );
-}
+import { COLORS, FONTS } from "./estilo";
 
 // ─── VARIABLES GLOBALES ───────────────────────────────────────────────────────
 var horas;
@@ -313,7 +88,14 @@ function Inicio() {
         for (let j = 0; j < notificaciones_agendadas.length; j++) {
           notificaciones_agendadas.find((no) => {
             console.log("notificacion" + no.content.body)
-            borrar_notificaciones.push(no.content.body.includes(nome_tarea) ? no : null)
+            let body_string = String(no.content.body);
+            var res_str = body_string.split(" ");
+            console.log("res_str " + res_str)
+            const remove = res_str.slice(0,3)
+            console.log("remove: [" + remove + "]")
+            console.log("nome_tarea: " + nome_tarea)
+            console.log("comparacion: " + (res_str[3] === nome_tarea))
+            borrar_notificaciones.push(res_str[3] === nome_tarea ? no : null)
           }
           );
 
