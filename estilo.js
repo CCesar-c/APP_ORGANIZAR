@@ -2,9 +2,9 @@
 import { Platform } from "react-native";
 // ─── DESIGN TOKENS ────────────────────────────────────────────────────────────
 const COLORS = {
-  bg: "#0D0F14",
+   bg: "#0D0F14",
   surface: "#161A22",
-  card: "#1C2130",
+  card: "#00001f",
   border: "#252C3D",
   accent: "#C9A84C",
   accentMuted: "rgba(201,168,76,0.12)",

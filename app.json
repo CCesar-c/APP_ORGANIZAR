@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "APP_ORGANIZAR",
-    "slug": "APP_ORGANIZAR",
+    "name": "App Organizar",
+    "slug": "app-organizar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
