@@ -130,13 +130,21 @@ function Inicio() {
             let body_string = String(no.content.body);
             var res_str = body_string.split(" ");
             // console.log("res_str " + res_str)
-            const remove = res_str.slice(0, 3)
             // console.log("remove: [" + remove + "]")
             // console.log("nome_tarea: " + res_str[3])
             // console.log("comparacion: " + (res_str[3] == nome_tarea))
-            var uniao = res_str.join("");
-            console.log("uniao: " + uniao)
-            borrar_notificaciones.push(res_str[3] == nome_tarea ? no : null)
+            const res_borrar = res_str.slice(0, 3)
+            console.log("borrados" + res_borrar)
+            var uniao = []
+            var nome_notificacion = ""
+            for (let i = 0; i < res_str.length; i++) {
+              if (res_str[i] != res_borrar[i]) {
+                uniao.push(res_str[i])
+              }
+              var nome_notificacion = uniao.join(" ")
+              console.log("uniao: " + nome_notificacion)
+            }
+            borrar_notificaciones.push(nome_notificacion == nome_tarea ? no : null)
           }
           );
 
@@ -381,7 +389,7 @@ function Crear_tareas() {
           await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria vespertina",
-              body: `Es hora de: ${nome} `,
+              body: `Es hora de: ${nome}`,
               android: {
                 channelId: "tareas-canal",
                 sound: true,
