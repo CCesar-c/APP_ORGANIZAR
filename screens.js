@@ -141,7 +141,7 @@ function Inicio() {
               if (res_str[i] != res_borrar[i]) {
                 uniao.push(res_str[i])
               }
-              var nome_notificacion = uniao.join(" ")
+              nome_notificacion = uniao.join(" ")
               console.log("uniao: " + nome_notificacion)
             }
             borrar_notificaciones.push(nome_notificacion == nome_tarea ? no : null)
