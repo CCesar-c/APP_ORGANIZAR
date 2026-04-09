@@ -142,7 +142,7 @@ function Inicio() {
                 uniao.push(res_str[i])
               }
               nome_notificacion = uniao.join(" ")
-              console.log("uniao: " + nome_notificacion)
+              console.log("uniao: " + nome_notificacion +"|")
             }
             borrar_notificaciones.push(nome_notificacion == nome_tarea ? no : null)
           }
@@ -370,7 +370,7 @@ function Crear_tareas() {
           await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria matutina",
-              body: `Es hora de: ${nome} `,
+              body: `Es hora de: ${nome}`,
               android: {
                 channelId: "tareas-canal",
                 sound: true,

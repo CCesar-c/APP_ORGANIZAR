@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "App Organizar",
-    "slug": "app-organizar",
+    "slug": "APP_ORGANIZAR",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +31,7 @@
         "projectId": "d25d1586-883b-470d-9e43-cb2d82ef6da9"
       }
     },
-    "plugins": [
-    ]
+    "plugins": [],
+    "owner": "cesar_colmenarez"
   }
 }
