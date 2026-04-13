@@ -10,7 +10,7 @@ import {
   Platform
 } from "react-native";
 const Notifications =
-  Platform.OS !== "web" ? require("expo-notifications") : null;
+Platform.OS !== "web" ? require("expo-notifications"): null;
 
 import {
   Divider,
@@ -42,7 +42,7 @@ function Inicio() {
   const [datos,
     setdatos] = useState([]);
   const [stats,
-    setStats] = useState({
+    setStats] = useState( {
       total: 0, completed: 0
     });
 
@@ -118,54 +118,30 @@ function Inicio() {
     obtenerTareas();
   }, []);
 
-  async function deleteItem(i, nome_tarea) {
-    if (Notifications) {
-      var borrar_notificaciones = []
-      try {
-        const notificaciones_agendadas =
-          await Notifications.getAllScheduledNotificationsAsync();
-        for (let j = 0; j < notificaciones_agendadas.length; j++) {
-          notificaciones_agendadas.find((no) => {
-            // console.log("notificacion" + no.content.body)
-            let body_string = String(no.content.body);
-            var res_str = body_string.split(" ");
-            // console.log("res_str " + res_str)
-            // console.log("remove: [" + remove + "]")
-            // console.log("nome_tarea: " + res_str[3])
-            // console.log("comparacion: " + (res_str[3] == nome_tarea))
-            const res_borrar = res_str.slice(0, 3)
-            console.log("borrados" + res_borrar)
-            var uniao = []
-            var nome_notificacion = ""
-            for (let i = 0; i < res_str.length; i++) {
-              if (res_str[i] != res_borrar[i]) {
-                uniao.push(res_str[i])
-              }
-              nome_notificacion = uniao.join(" ")
-              console.log("uniao: " + nome_notificacion +"|")
-            }
-            borrar_notificaciones.push(nome_notificacion == nome_tarea ? no : null)
-          }
-          );
-
-          for (let k = 0; k < borrar_notificaciones.length; k++) {
-            if (borrar_notificaciones[k] != null) {
-              // console.log('borrando' + borrar_notificaciones[k].identifier)
-              await Notifications.cancelScheduledNotificationAsync(borrar_notificaciones[k].identifier);
-            }
-          }
+  async function deleteItem(i, id_manana, id_tarde, id_noche) {
+    var borrar_notificaciones = []
+    try {
+      console.log(id_manana +"\n"+id_tarde +"\n"+id_noche)
+      borrar_notificaciones.push(id_manana)
+      borrar_notificaciones.push(id_tarde)
+      borrar_notificaciones.push(id_noche)
+      for (let k = 0; k < borrar_notificaciones.length; k++) {
+        if (borrar_notificaciones[k] != null) {
+          await Notifications.cancelScheduledNotificationAsync(borrar_notificaciones[k]);
+          console.log(borrar_notificaciones[k])
         }
-      } catch (e) {
-        console.error(e);
+        
       }
+      const list = [...datos];
+      list.splice(i, 1);
+      setdatos(list);
+      setStats({
+        total: list.length, completed: list.filter((t) => t.feita).length
+      });
+      await AsyncStorage.setItem("stacks", JSON.stringify(list));
+    }catch(e) {
+      console.error(e)
     }
-    const list = [...datos];
-    list.splice(i, 1);
-    setdatos(list);
-    setStats({
-      total: list.length, completed: list.filter((t) => t.feita).length
-    });
-    await AsyncStorage.setItem("stacks", JSON.stringify(list));
   }
 
   async function changeState(i) {
@@ -177,23 +153,25 @@ function Inicio() {
         total: nuevaLista.length,
         completed: nuevaLista.filter((t) => t.feita).length,
       });
-      await AsyncStorage.setItem("stacks", JSON.stringify(nuevaLista));
+      await AsyncStorage.setItem("stacks",
+        JSON.stringify(nuevaLista));
     } catch (e) {
       console.error(e);
     }
   }
 
-  const progressPct = stats.total > 0 ? stats.completed / stats.total : 0;
+  const progressPct = stats.total > 0 ? stats.completed / stats.total: 0;
 
   return (
     <ScreenWrapper>
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={ { padding: 20,
+          paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
-      >
+        >
         {/* Header KPI */}
         <View
-          style={{
+          style={ {
             backgroundColor: COLORS.card,
             borderRadius: 10,
             borderWidth: 1,
@@ -201,44 +179,65 @@ function Inicio() {
             padding: 20,
             marginBottom: 24,
           }}
-        >
-          <Text style={{ color: COLORS.textSecondary, fontSize: 11, letterSpacing: 1.2, fontWeight: "700", marginBottom: 12 }}>
+          >
+          <Text style={ { color: COLORS.textSecondary,
+            fontSize: 11,
+            letterSpacing: 1.2,
+            fontWeight: "700",
+            marginBottom: 12 }}>
             RESUMEN DEL DÍA
           </Text>
-          <View style={{ flexDirection: "row", gap: 20, marginBottom: 16 }}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: COLORS.text, fontSize: 32, fontWeight: "700", ...FONTS.display }}>{stats.total}</Text>
-              <Text style={{ color: COLORS.textSecondary, fontSize: 12 }}>Tareas totales</Text>
+          <View style={ { flexDirection: "row",
+            gap: 20,
+            marginBottom: 16 }}>
+            <View style={ { flex: 1 }}>
+              <Text style={ { color: COLORS.text,
+                fontSize: 32,
+                fontWeight: "700",
+                ...FONTS.display }}>{stats.total}</Text>
+              <Text style={ { color: COLORS.textSecondary,
+                fontSize: 12 }}>Tareas totales</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: COLORS.success, fontSize: 32, fontWeight: "700", ...FONTS.display }}>{stats.completed}</Text>
-              <Text style={{ color: COLORS.textSecondary, fontSize: 12 }}>Completadas</Text>
+            <View style={ { flex: 1 }}>
+              <Text style={ { color: COLORS.success,
+                fontSize: 32,
+                fontWeight: "700",
+                ...FONTS.display }}>{stats.completed}</Text>
+              <Text style={ { color: COLORS.textSecondary,
+                fontSize: 12 }}>Completadas</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: COLORS.accent, fontSize: 32, fontWeight: "700", ...FONTS.display }}>
-                {stats.total > 0 ? Math.round(progressPct * 100) : 0}%
+            <View style={ { flex: 1 }}>
+              <Text style={ { color: COLORS.accent,
+                fontSize: 32,
+                fontWeight: "700",
+                ...FONTS.display }}>
+                {stats.total > 0 ? Math.round(progressPct * 100): 0}%
               </Text>
-              <Text style={{ color: COLORS.textSecondary, fontSize: 12 }}>Progreso</Text>
+              <Text style={ { color: COLORS.textSecondary,
+                fontSize: 12 }}>Progreso</Text>
             </View>
           </View>
           {/* Progress bar */}
-          <View style={{ height: 4, backgroundColor: COLORS.border, borderRadius: 2, overflow: "hidden" }}>
+          <View style={ { height: 4,
+            backgroundColor: COLORS.border,
+            borderRadius: 2,
+            overflow: "hidden" }}>
             <View
-              style={{
+              style={ {
                 height: "100%",
                 width: `${progressPct * 100}%`,
                 backgroundColor: COLORS.accent,
                 borderRadius: 2,
               }}
-            />
+              />
           </View>
         </View>
 
         <SectionHeader title="Cosas Por Hacer" subtitle={`${stats.total - stats.completed} pendientes`} />
         {datos.length === 0 && (
-          <View style={{ alignItems: "center", paddingVertical: 48 }}>
-            <Text style={{ fontSize: 36, marginBottom: 12 }}>📋</Text>
-            <Text style={{ color: COLORS.textSecondary, fontSize: 14 }}>
+          <View style={ { alignItems: "center", paddingVertical: 48 }}>
+            <Text style={ { fontSize: 36, marginBottom: 12 }}>📋</Text>
+            <Text style={ { color: COLORS.textSecondary, fontSize: 14 }}>
               No hay tareas registradas
             </Text>
           </View>
@@ -247,59 +246,59 @@ function Inicio() {
         {datos.map((item, index) => (
           <View
             key={index}
-            style={{
-              backgroundColor: item.feita ? COLORS.surface : COLORS.card,
+            style={ {
+              backgroundColor: item.feita ? COLORS.surface: COLORS.card,
               borderWidth: 1,
-              borderColor: item.feita ? COLORS.border : COLORS.accentSoft,
+              borderColor: item.feita ? COLORS.border: COLORS.accentSoft,
               borderRadius: 8,
               padding: 14,
               marginBottom: 10,
-              opacity: item.feita ? 0.65 : 1,
+              opacity: item.feita ? 0.65: 1,
             }}
-          >
+            >
 
             {/* Row 1: title + badges + actions */}
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <View style={{ flex: 1 }}>
+            <View style={ { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <View style={ { flex: 1 }}>
                 <Text
-                  style={{
-                    color: item.feita ? COLORS.textSecondary : COLORS.text,
+                  style={ {
+                    color: item.feita ? COLORS.textSecondary: COLORS.text,
                     fontSize: 15,
                     fontWeight: "600",
-                    textDecorationLine: item.feita ? "line-through" : "none",
+                    textDecorationLine: item.feita ? "line-through": "none",
                     ...FONTS.heading,
                   }}
-                >
+                  >
                   {item.nome + " " + index}
                 </Text>
               </View>
               <Badge
-                label={item.feita ? "HECHA" : "PENDIENTE"}
-                variant={item.feita ? "success" : "default"}
-              />
+                label={item.feita ? "HECHA": "PENDIENTE"}
+                variant={item.feita ? "success": "default"}
+                />
             </View>
 
             {item.descripcion ? (
-              <Text style={{ color: COLORS.textSecondary, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
+              <Text style={ { color: COLORS.textSecondary, fontSize: 12, marginBottom: 10, lineHeight: 18 }}>
                 {item.descripcion}
               </Text>
-            ) : null}
+            ): null}
 
-            <Divider style={{ marginBottom: 10 }} />
+            <Divider style={ { marginBottom: 10 }} />
 
             {/* Row 2: date + actions */}
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Text style={{ color: COLORS.textMuted, fontSize: 10 }}>🗓</Text>
-                <Text style={{ color: COLORS.textMuted, fontSize: 11, ...FONTS.mono }}>
+            <View style={ { flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={ { flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Text style={ { color: COLORS.textMuted, fontSize: 10 }}>🗓</Text>
+                <Text style={ { color: COLORS.textMuted, fontSize: 11, ...FONTS.mono }}>
                   {item.fecha}
                 </Text>
               </View>
-              <View style={{ flexDirection: "row", gap: 6 }}>
+              <View style={ { flexDirection: "row", gap: 6 }}>
                 <TouchableOpacity
                   onPress={() => alert("Descripción: " + item.descripcion)}
                   activeOpacity={0.7}
-                  style={{
+                  style={ {
                     backgroundColor: COLORS.surface,
                     borderRadius: 6,
                     paddingHorizontal: 10,
@@ -307,19 +306,19 @@ function Inicio() {
                     borderWidth: 1,
                     borderColor: COLORS.border,
                   }}
-                >
-                  <Text style={{ color: COLORS.textSecondary, fontSize: 11 }}>Ver detalle</Text>
+                  >
+                  <Text style={ { color: COLORS.textSecondary, fontSize: 11 }}>Ver detalle</Text>
                 </TouchableOpacity>
                 <IconButton
                   onPress={() => changeState(index)}
-                  icon={item.feita ? "↩" : "✓"}
-                  variant={item.feita ? "ghost" : "success"}
-                />
+                  icon={item.feita ? "↩": "✓"}
+                  variant={item.feita ? "ghost": "success"}
+                  />
                 <IconButton
-                  onPress={() => deleteItem(index, item.nome)}
+                  onPress={() => deleteItem(index, item.id_manana, item.id_tarde, item.id_noche)}
                   icon="✕"
                   variant="danger"
-                />
+                  />
               </View>
             </View>
           </View>
@@ -363,11 +362,14 @@ function Crear_tareas() {
     try {
       if (Platform.OS === "android" && Notifications) {
         if (mnn == false && td == false && nc == false) {
-          alert("No colacaste que horario va a tocar la alarmar")
-          return;
+          alert("No colacaste que horario va a tocar la alarmar");
         }
+        var id_mnn = ""
+        var id_td = ""
+        var id_nc = ""
+
         if (mnn == true) {
-          await Notifications.scheduleNotificationAsync({
+          id_mnn =await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria matutina",
               body: `Es hora de: ${nome}`,
@@ -386,7 +388,7 @@ function Crear_tareas() {
           });
         }
         if (td == true) {
-          await Notifications.scheduleNotificationAsync({
+          id_td = await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria vespertina",
               body: `Es hora de: ${nome}`,
@@ -405,7 +407,7 @@ function Crear_tareas() {
           });
         }
         if (nc == true) {
-          await Notifications.scheduleNotificationAsync({
+          id_nc = await Notifications.scheduleNotificationAsync({
             content: {
               title: "¡Oye! Tarea Diaria nocturna",
               body: `Es hora de: ${nome}`,
@@ -423,9 +425,17 @@ function Crear_tareas() {
             },
           });
         }
+        
+        console.log("id manana " +id_mnn)
+        console.log("id tarde "+id_td)
+        console.log("id noche " +id_nc)
+        
         const nueva_tarea = {
           nome: nome,
           descripcion: descripcion,
+          id_manana:id_mnn,
+          id_tarde:id_td,
+          id_noche:id_nc,
           fecha: new Date().toLocaleDateString("es-ES"),
           feita: false,
         };
@@ -451,7 +461,7 @@ function Crear_tareas() {
         };
         const resultado = await AsyncStorage.getItem("stacks");
         let lista_actualizada = resultado ? [nueva_tarea,
-          ...JSON.parse(resultado)] : [nueva_tarea];
+          ...JSON.parse(resultado)]: [nueva_tarea];
         await AsyncStorage.setItem("stacks", JSON.stringify(lista_actualizada));
       }
 
@@ -471,14 +481,14 @@ function Crear_tareas() {
   return (
     <ScreenWrapper>
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={ { padding: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
-      >
+        >
         <SectionHeader title="Nueva Tarea" subtitle="Complete los campos para registrar la tarea" />
 
         {saved && (
           <View
-            style={{
+            style={ {
               backgroundColor: COLORS.successMuted,
               borderWidth: 1,
               borderColor: COLORS.success,
@@ -489,9 +499,9 @@ function Crear_tareas() {
               alignItems: "center",
               gap: 8,
             }}
-          >
-            <Text style={{ fontSize: 16 }}>✅</Text>
-            <Text style={{ color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
+            >
+            <Text style={ { fontSize: 16 }}>✅</Text>
+            <Text style={ { color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
               Tarea creada correctamente
             </Text>
           </View>
@@ -499,7 +509,7 @@ function Crear_tareas() {
 
         {/* Form card */}
         <View
-          style={{
+          style={ {
             backgroundColor: COLORS.card,
             borderRadius: 10,
             borderWidth: 1,
@@ -508,20 +518,20 @@ function Crear_tareas() {
             gap: 16,
             marginBottom: 20,
           }}
-        >
+          >
           <View>
-            <Text style={{ color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 }}>
+            <Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 }}>
               NOMBRE DE LA TAREA *
             </Text>
             <StyledInput
               placeholder="Ej: Revisar correos pendientes"
               value={nome}
               onChangeText={(t) => setnome(t)}
-            />
+              />
           </View>
 
           <View>
-            <Text style={{ color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 }}>
+            <Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 8 }}>
               DESCRIPCIÓN
             </Text>
             <StyledInput
@@ -529,13 +539,13 @@ function Crear_tareas() {
               value={descripcion}
               onChangeText={(t) => setdescripcion(t)}
               multiline
-            />
+              />
           </View>
         </View>
 
         {/* Horario section */}
         <View
-          style={{
+          style={ {
             backgroundColor: COLORS.card,
             borderRadius: 10,
             borderWidth: 1,
@@ -543,67 +553,67 @@ function Crear_tareas() {
             padding: 20,
             marginBottom: 24,
           }}
-        >
-          <Text style={{ color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 16 }}>
+          >
+          <Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 16 }}>
             RECORDATORIO DIARIO
           </Text>
 
           {[{
             label: "Mañana", icon: "🌅", value: mnn, setter: setmnn
           },
-          {
-            label: "Tarde", icon: "☀️", value: td, setter: settd
-          },
-          {
-            label: "Noche", icon: "🌙", value: nc, setter: setnc
-          },
+            {
+              label: "Tarde", icon: "☀️", value: td, setter: settd
+            },
+            {
+              label: "Noche", icon: "🌙", value: nc, setter: setnc
+            },
           ].map((item) => (
-            <TouchableOpacity
-              key={item.label}
-              onPress={() => item.setter(!item.value)}
-              activeOpacity={0.7}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: COLORS.border,
-              }}
-            >
-              <Text style={{ fontSize: 18, marginRight: 12 }}>{item.icon}</Text>
-              <Text style={{ color: COLORS.text, fontSize: 14, flex: 1, ...FONTS.body }}>
-                {item.label}
-              </Text>
-              <View
-                style={{
-                  width: 44,
-                  height: 24,
-                  borderRadius: 12,
-                  backgroundColor: item.value ? COLORS.accent : COLORS.border,
-                  padding: 2,
-                  justifyContent: "center",
+              <TouchableOpacity
+                key={item.label}
+                onPress={() => item.setter(!item.value)}
+                activeOpacity={0.7}
+                style={ {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 12,
+                  borderBottomWidth: 1,
+                  borderBottomColor: COLORS.border,
                 }}
-              >
+                >
+                <Text style={ { fontSize: 18, marginRight: 12 }}>{item.icon}</Text>
+                <Text style={ { color: COLORS.text, fontSize: 14, flex: 1, ...FONTS.body }}>
+                  {item.label}
+                </Text>
                 <View
-                  style={{
-                    width: 20,
-                    height: 20,
-                    borderRadius: 10,
-                    backgroundColor: COLORS.white,
-                    alignSelf: item.value ? "flex-end" : "flex-start",
+                  style={ {
+                    width: 44,
+                    height: 24,
+                    borderRadius: 12,
+                    backgroundColor: item.value ? COLORS.accent: COLORS.border,
+                    padding: 2,
+                    justifyContent: "center",
                   }}
-                />
-              </View>
-            </TouchableOpacity>
-          ))}
+                  >
+                  <View
+                    style={ {
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      backgroundColor: COLORS.white,
+                      alignSelf: item.value ? "flex-end": "flex-start",
+                    }}
+                    />
+                </View>
+              </TouchableOpacity>
+            ))}
         </View>
 
         <PrimaryButton
           onPress={guardar_tarea}
           icon="＋"
           disabled={!nome.trim() || saving}
-        >
-          {saving ? "Guardando..." : "Registrar Tarea"}
+          >
+          {saving ? "Guardando...": "Registrar Tarea"}
         </PrimaryButton>
       </ScrollView>
     </ScreenWrapper>
@@ -645,20 +655,20 @@ function Opciones() {
     setter: setmnn,
     placeholder: `${(horas && horas[0]) || 7}.${(minutos && minutos[0]) || "00"}`,
   },
-  {
-    label: "Tarde",
-    icon: "☀️",
-    value: td,
-    setter: settd,
-    placeholder: `${(horas && horas[1]) || 13}.${(minutos && minutos[1]) || "00"}`,
-  },
-  {
-    label: "Noche",
-    icon: "🌙",
-    value: nc,
-    setter: setnc,
-    placeholder: `${(horas && horas[2]) || 19}.${(minutos && minutos[2]) || "00"}`,
-  },
+    {
+      label: "Tarde",
+      icon: "☀️",
+      value: td,
+      setter: settd,
+      placeholder: `${(horas && horas[1]) || 13}.${(minutos && minutos[1]) || "00"}`,
+    },
+    {
+      label: "Noche",
+      icon: "🌙",
+      value: nc,
+      setter: setnc,
+      placeholder: `${(horas && horas[2]) || 19}.${(minutos && minutos[2]) || "00"}`,
+    },
   ];
 
   function parseHorario(text, setter) {
@@ -675,14 +685,14 @@ function Opciones() {
   return (
     <ScreenWrapper>
       <ScrollView
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={ { padding: 20, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
-      >
+        >
         <SectionHeader title="Configuración" subtitle="Ajusta los horarios de recordatorio" />
 
         {saved && (
           <View
-            style={{
+            style={ {
               backgroundColor: COLORS.successMuted,
               borderWidth: 1,
               borderColor: COLORS.success,
@@ -693,9 +703,9 @@ function Opciones() {
               gap: 8,
               alignItems: "center",
             }}
-          >
-            <Text style={{ fontSize: 16 }}>✅</Text>
-            <Text style={{ color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
+            >
+            <Text style={ { fontSize: 16 }}>✅</Text>
+            <Text style={ { color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
               Horarios guardados correctamente
             </Text>
           </View>
@@ -703,7 +713,7 @@ function Opciones() {
 
         {/* Horarios card */}
         <View
-          style={{
+          style={ {
             backgroundColor: COLORS.card,
             borderRadius: 10,
             borderWidth: 1,
@@ -711,21 +721,21 @@ function Opciones() {
             padding: 20,
             marginBottom: 24,
           }}
-        >
-          <Text style={{ color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 20 }}>
+          >
+          <Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 20 }}>
             HORARIOS DE NOTIFICACIÓN
           </Text>
-          <Text style={{ color: COLORS.textMuted, fontSize: 12, marginBottom: 20, lineHeight: 18 }}>
+          <Text style={ { color: COLORS.textMuted, fontSize: 12, marginBottom: 20, lineHeight: 18 }}>
             Ingresa el horario en formato{" "}
-            <Text style={{ color: COLORS.accent, ...FONTS.mono }}>HH.MM</Text> — por ejemplo{" "}
-            <Text style={{ color: COLORS.accent, ...FONTS.mono }}>7.30</Text> para las 7:30 AM.
+            <Text style={ { color: COLORS.accent, ...FONTS.mono }}>HH.MM</Text> — por ejemplo{" "}
+            <Text style={ { color: COLORS.accent, ...FONTS.mono }}>7.30</Text> para las 7:30 AM.
           </Text>
 
           {horarios.map((item, i) => (
-            <View key={item.label} style={{ marginBottom: i < horarios.length - 1 ? 20 : 0 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Text style={{ fontSize: 16 }}>{item.icon}</Text>
-                <Text style={{ color: COLORS.text, fontSize: 13, fontWeight: "600" }}>
+            <View key={item.label} style={ { marginBottom: i < horarios.length - 1 ? 20: 0 }}>
+              <View style={ { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Text style={ { fontSize: 16 }}>{item.icon}</Text>
+                <Text style={ { color: COLORS.text, fontSize: 13, fontWeight: "600" }}>
                   {item.label}
                 </Text>
               </View>
@@ -733,13 +743,13 @@ function Opciones() {
                 placeholder={`Actual: ${item.placeholder}`}
                 placeholderTextColor={COLORS.textMuted}
                 value={
-                  Array.isArray(item.value) && item.value.length > 0
-                    ? `${item.value[0]}.${String(item.value[1]).padStart(2, "0")}` : ""
+                Array.isArray(item.value) && item.value.length > 0
+                ? `${item.value[0]}.${String(item.value[1]).padStart(2, "0")}`: ""
                 }
                 maxLength={5}
                 keyboardType="numeric"
                 onChangeText={(t) => parseHorario(t, item.setter)}
-                style={{
+                style={ {
                   backgroundColor: COLORS.surface,
                   borderWidth: 1,
                   borderColor: COLORS.border,
@@ -750,14 +760,14 @@ function Opciones() {
                   fontSize: 14,
                   ...FONTS.mono,
                 }}
-              />
+                />
             </View>
           ))}
         </View>
 
         {/* Info card */}
         <View
-          style={{
+          style={ {
             backgroundColor: COLORS.accentMuted,
             borderRadius: 8,
             borderWidth: 1,
@@ -767,13 +777,13 @@ function Opciones() {
             gap: 12,
             marginBottom: 24,
           }}
-        >
-          <Text style={{ fontSize: 18 }}>ℹ️</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: COLORS.accent, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>
+          >
+          <Text style={ { fontSize: 18 }}>ℹ️</Text>
+          <View style={ { flex: 1 }}>
+            <Text style={ { color: COLORS.accent, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>
               NOTA IMPORTANTE
             </Text>
-            <Text style={{ color: COLORS.textSecondary, fontSize: 12, lineHeight: 18 }}>
+            <Text style={ { color: COLORS.textSecondary, fontSize: 12, lineHeight: 18 }}>
               Los cambios de horario solo afectan a las tareas creadas desde este momento en adelante.
               Las notificaciones existentes mantienen su horario original.
             </Text>
