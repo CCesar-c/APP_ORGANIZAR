@@ -128,7 +128,7 @@ function CustomDrawerContent({ navigation, state }) {
         }}
       >
         <Text style={{ color: COLORS.textMuted, fontSize: 10, letterSpacing: 0.8 }}>
-          v1.0.0  ·  ENTERPRISE EDITION
+          ·  ENTERPRISE EDITION
         </Text>
       </View>
     </View>
