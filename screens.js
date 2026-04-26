@@ -131,7 +131,7 @@ function Inicio() {
       console.error("Error al leer la memoria", e);
     }
   };
-  const copiaStack = useRef(datos);
+  // const copiaStack = useRef(datos);
 
   useEffect(() => {
     checkVersion();
