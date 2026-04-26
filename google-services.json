@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "381482823997",
+    "project_id": "app-organizar",
+    "storage_bucket": "app-organizar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381482823997:android:804a3dd0984fe4d8ee9554",
+        "android_client_info": {
+          "package_name": "com.cesar_colmenarez.APP_ORGANIZAR"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUQOjEmcGB-F-5YvKq-z5VqQicDMV_sRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
