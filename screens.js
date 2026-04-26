@@ -133,6 +133,7 @@ function Inicio() {
       console.error("Error al leer la memoria", e);
     }
   };
+  const copiaStack = useRef(datos);
 
   useEffect(() => {
     checkVersion();
@@ -141,19 +142,14 @@ function Inicio() {
   }, []);
 
   async function deleteItem(i, id_manana, id_tarde, id_noche) {
-    var borrar_notificaciones = []
     try {
-      console.log(id_manana + "\n" + id_tarde + "\n" + id_noche)
-      borrar_notificaciones.push(id_manana)
-      borrar_notificaciones.push(id_tarde)
-      borrar_notificaciones.push(id_noche)
-      for (let k = 0; k < borrar_notificaciones.length; k++) {
-        if (borrar_notificaciones[k] != null) {
-          await Notifications.cancelScheduledNotificationAsync(borrar_notificaciones[k]);
-          console.log(borrar_notificaciones[k])
-        }
 
-      }
+      id_manana ? await Notifications.cancelScheduledNotificationAsync(id_manana) : null;
+      id_tarde ? await Notifications.cancelScheduledNotificationAsync(id_tarde) : null;
+      id_noche ? await Notifications.cancelScheduledNotificationAsync(id_noche) : null;
+
+      console.log(id_manana + "\n" + id_tarde + "\n" + id_noche)
+
       const list = [...datos];
       list.splice(i, 1);
       setdatos(list);
