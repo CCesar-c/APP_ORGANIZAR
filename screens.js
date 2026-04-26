@@ -102,8 +102,6 @@ function Inicio() {
 
   const obtenerTareas = async () => {
     try {
-
-
       //await Notifications.cancelAllScheduledNotificationsAsync();
       if (Platform.OS == "android") {
         console.log(await Notifications.getAllScheduledNotificationsAsync())
