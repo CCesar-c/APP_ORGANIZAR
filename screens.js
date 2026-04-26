@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
+import * as Filesystem from 'expo-file-system';
 import {
   Platform
 } from "react-native";
@@ -131,7 +132,6 @@ function Inicio() {
       console.error("Error al leer la memoria", e);
     }
   };
-  // const copiaStack = useRef(datos);
 
   useEffect(() => {
     checkVersion();
@@ -146,13 +146,14 @@ function Inicio() {
       id_tarde ? await Notifications.cancelScheduledNotificationAsync(id_tarde) : null;
       id_noche ? await Notifications.cancelScheduledNotificationAsync(id_noche) : null;
 
-      console.log(id_manana + "\n" + id_tarde + "\n" + id_noche)
+      console.log("id_manana: " + id_manana + "\n" + "id_tarde: " + id_tarde + "\n" + "id_noche: " + id_noche)
 
       const list = [...datos];
       list.splice(i, 1);
       setdatos(list);
       setStats({
-        total: list.length, completed: list.filter((t) => t.feita).length
+        total: list.length,
+        completed: list.filter((t) => t.feita).length
       });
       await AsyncStorage.setItem("stacks", JSON.stringify(list));
     } catch (e) {
@@ -658,6 +659,41 @@ function Crear_tareas() {
 
 // ─── PANTALLA: OPCIONES ───────────────────────────────────────────────────────
 function Opciones() {
+  const ExportarStack = async () => {
+    try {
+      const fileName = `backup.json`;
+      const fileUri = `${Filesystem.documentDirectory}${fileName}`;
+      const stacks = await AsyncStorage.getItem("stacks") || "[]"
+
+      await Filesystem.writeAsStringAsync(fileUri, stacks, {
+        encoding: Filesystem.EncodingType.UTF8,
+      });
+
+      Alert.alert("Copia creada", `Archivo guardado en: ${fileUri}`);
+    } catch (error) {
+      console.log("Error al copiar el stack:", error);
+    }
+  }
+  const ImportarStack = async () => {
+    try {
+      const fileUri = `${Filesystem.documentDirectory}backup.json`;
+      const fileInfo = await Filesystem.getInfoAsync(fileUri);
+
+      if (!fileInfo.exists) {
+        Alert.alert("Archivo no encontrado", "No se encontró el archivo de respaldo.");
+        return;
+      }
+
+      const fileContent = await Filesystem.readAsStringAsync(fileUri, {
+        encoding: Filesystem.EncodingType.UTF8,
+      });
+
+      await AsyncStorage.setItem("stacks", fileContent);
+      Alert.alert("Restauración exitosa", "El stack ha sido restaurado desde el archivo.");
+    } catch (error) {
+      console.log("Error al restaurar el stack:", error);
+    }
+  }
   const [mnn,
     setmnn] = useState([]);
   const [td,
@@ -829,6 +865,15 @@ function Opciones() {
         <PrimaryButton onPress={guardar_hora} icon="💾">
           Guardar Horarios
         </PrimaryButton>
+        <Divider style={{ marginVertical: 32 }} />
+        <View style={{ flexDirection: "row", columnGap: 800, flex: 1, display: "flex", justifyContent: "center" }}>
+          <PrimaryButton onPress={ExportarStack} style={{ width: 200 }} icon="📤">
+            Exportar Tareas
+          </PrimaryButton>
+          <PrimaryButton onPress={ImportarStack} style={{ width: 200 }} icon="📥">
+            Importar Tareas
+          </PrimaryButton>
+        </View>
       </ScrollView>
     </ScreenWrapper>
   );
