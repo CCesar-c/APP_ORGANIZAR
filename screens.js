@@ -85,7 +85,7 @@ function Inicio() {
 
     // 3. Si el usuario dijo que NO, avisamos que la app no funcionará igual
     if (finalStatus !== 'granted') {
-      throw new Error("mira pedazo de mierda, o me das el permiso o les doy el permiso de meterte el pito");
+      throw new Error("Sin permisos el app no funciona");
     };
     // alert("el app no funcionara igual porfavor, active las Notifications del este app")
     // BackHandler.exitApp();

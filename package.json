@@ -24,6 +24,7 @@
     "expo-notifications": "~55.0.20",
     "expo-status-bar": "~55.0.5",
     "expo-system-ui": "~55.0.16",
+    "expo-updates": "~55.0.21",
     "install": "^0.13.0",
     "npx": "^3.0.0",
     "react": "19.2.0",
