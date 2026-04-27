@@ -682,13 +682,13 @@ function Opciones() {
           encoding: Filesystem.EncodingType.UTF8,
         });
 
-        alert("Éxito", "Copia de seguridad guardada correctamente.");
+        alert("Éxito \n Copia de seguridad guardada correctamente.");
       } else {
-        alert("Permiso denegado", "No se pudo guardar el archivo.");
+        alert("Permiso denegado \n No se pudo guardar el archivo.");
       }
     } catch (error) {
-      console.error("Error al exportar:", error);
-      alert("Error", "Hubo un problema al exportar.");
+      console.error("Error al exportar: "+ error);
+      alert("Error \n Hubo un problema al exportar.");
     }
   };
 
@@ -718,11 +718,11 @@ function Opciones() {
 
         // Guardar en AsyncStorage
         await AsyncStorage.setItem("stacks", fileContent);
-        alert("Éxito", "Datos importados correctamente.");
+        alert("Éxito \n Datos importados correctamente.");
       }
     } catch (error) {
-      console.error("Error al importar:", error);
-      alert("Error", "No se pudo leer el archivo.");
+      console.error("Error al importar: "+ error);
+      alert("Error \n No se pudo leer el archivo.");
     }
   };
   const [mnn,
