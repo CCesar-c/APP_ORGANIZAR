@@ -14,7 +14,7 @@ const Notifications =
   Platform.OS !== "web" ? require("expo-notifications") : null;
 
 import { Alert, Linking } from "react-native";
-import remoteConfig from "@react-native-firebase/remote-config";
+import {remoteConfig, initializeApp } from "@react-native-firebase/remote-config";
 import Constants from "expo-constants";
 import {
   Divider,
