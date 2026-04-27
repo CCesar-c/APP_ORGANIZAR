@@ -661,39 +661,70 @@ function Crear_tareas() {
 function Opciones() {
   const ExportarStack = async () => {
     try {
-      const fileName = `backup.json`;
-      const fileUri = `${Filesystem.documentDirectory}${fileName}`;
-      const stacks = await AsyncStorage.getItem("stacks") || "[]"
+      const stacks = await AsyncStorage.getItem("stacks") || "[]";
+      const {
+        StorageAccessFramework
+      } = Filesystem;
 
-      await Filesystem.writeAsStringAsync(fileUri, stacks, {
-        encoding: Filesystem.EncodingType.UTF8,
-      });
+      // Solicitar al usuario que elija una carpeta para guardar
+      const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
 
-      Alert.alert("Copia creada", `Archivo guardado en: ${fileUri}`);
+      if (permissions.granted) {
+        // Crear el archivo en la carpeta seleccionada
+        const fileUri = await StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          'backup.json',
+          'application/json'
+        );
+
+        // Escribir los datos en el nuevo archivo
+        await Filesystem.writeAsStringAsync(fileUri, stacks, {
+          encoding: Filesystem.EncodingType.UTF8,
+        });
+
+        alert("Éxito", "Copia de seguridad guardada correctamente.");
+      } else {
+        alert("Permiso denegado", "No se pudo guardar el archivo.");
+      }
     } catch (error) {
-      console.log("Error al copiar el stack:", error);
+      console.error("Error al exportar:", error);
+      alert("Error", "Hubo un problema al exportar.");
     }
-  }
+  };
+
   const ImportarStack = async () => {
     try {
-      const fileUri = `${Filesystem.documentDirectory}backup.json`;
-      const fileInfo = await Filesystem.getInfoAsync(fileUri);
+      const {
+        StorageAccessFramework
+      } = Filesystem;
 
-      if (!fileInfo.exists) {
-        Alert.alert("Archivo no encontrado", "No se encontró el archivo de respaldo.");
-        return;
+      // Pedir permiso para acceder a la carpeta donde está el backup
+      const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+      if (permissions.granted) {
+        // Listar los archivos de la carpeta para buscar el 'backup.json'
+        const files = await StorageAccessFramework.readDirectoryAsync(permissions.directoryUri);
+        const backupFile = files.find(file => file.includes('backup.json'));
+
+        if (!backupFile) {
+          alert("No encontrado", "No se encontró el archivo backup.json en esta carpeta.");
+          return;
+        }
+
+        // Leer el contenido del archivo
+        const fileContent = await Filesystem.readAsStringAsync(backupFile, {
+          encoding: Filesystem.EncodingType.UTF8,
+        });
+
+        // Guardar en AsyncStorage
+        await AsyncStorage.setItem("stacks", fileContent);
+        alert("Éxito", "Datos importados correctamente.");
       }
-
-      const fileContent = await Filesystem.readAsStringAsync(fileUri, {
-        encoding: Filesystem.EncodingType.UTF8,
-      });
-
-      await AsyncStorage.setItem("stacks", fileContent);
-      Alert.alert("Restauración exitosa", "El stack ha sido restaurado desde el archivo.");
     } catch (error) {
-      console.log("Error al restaurar el stack:", error);
+      console.error("Error al importar:", error);
+      alert("Error", "No se pudo leer el archivo.");
     }
-  }
+  };
   const [mnn,
     setmnn] = useState([]);
   const [td,
@@ -866,10 +897,10 @@ function Opciones() {
           Guardar Horarios
         </PrimaryButton>
         <View style={{ marginVertical: 20, flexDirection: "column", rowGap: 10, flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <PrimaryButton onPress={ExportarStack} style={{ width: 200 }} icon="📤">
+          <PrimaryButton onPress={() => ExportarStack()} style={{ width: 200 }} icon="📤">
             Exportar Tareas
           </PrimaryButton>
-          <PrimaryButton onPress={ImportarStack} style={{ width: 200 }} icon="📥">
+          <PrimaryButton onPress={() => ImportarStack()} style={{ width: 200 }} icon="📥">
             Importar Tareas
           </PrimaryButton>
         </View>
