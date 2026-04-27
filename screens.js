@@ -695,7 +695,7 @@ function Opciones() {
       }
     } catch (error) {
       console.error("Error al exportar:", error);
-      Alert.alert("Error", "Hubo un problema al exportar.");
+      alert("Error", "Hubo un problema al exportar.");
     }
   };
 
@@ -714,7 +714,7 @@ function Opciones() {
         const backupFile = files.find(file => file.includes('backup.json'));
 
         if (!backupFile) {
-          Alert.alert("No encontrado", "No se encontró el archivo backup.json en esta carpeta.");
+          alert("No encontrado", "No se encontró el archivo backup.json en esta carpeta.");
           return;
         }
 
@@ -725,206 +725,201 @@ function Opciones() {
 
         // Guardar en AsyncStorage
         await AsyncStorage.setItem("stacks", fileContent);
-        Alert.alert("Éxito", "Datos importados correctamente.");
+        alert("Éxito", "Datos importados correctamente.");
       }
     } catch (error) {
       console.error("Error al importar:", error);
       Alert.alert("Error", "No se pudo leer el archivo.");
     }
   };
-  await AsyncStorage.setItem("stacks", fileContent);
-  Alert.alert("Restauración exitosa", "El stack ha sido restaurado desde el archivo.");
-} catch (error) {
-  console.log("Error al restaurar el stack:", error);
-}
-}
-const [mnn,
-setmnn] = useState([]);
-const [td,
-settd] = useState([]);
-const [nc,
-setnc] = useState([]);
-const [saved,
-setSaved] = useState(false);
 
-async function guardar_hora() {
-if (mnn && td && nc) {
-horas = [];
-minutos = [];
-horas.push(mnn[0]);
-minutos.push(mnn[1]);
-horas.push(td[0]);
-minutos.push(td[1]);
-horas.push(nc[0]);
-minutos.push(nc[1]);
-await AsyncStorage.setItem("cargar_horas", JSON.stringify(horas));
-await AsyncStorage.setItem("cargar_minutos", JSON.stringify(minutos));
-setSaved(true);
-setTimeout(() => setSaved(false), 2500);
-}
-}
+  const [mnn,
+    setmnn] = useState([]);
+  const [td,
+    settd] = useState([]);
+  const [nc,
+    setnc] = useState([]);
+  const [saved,
+    setSaved] = useState(false);
 
-const horarios = [{
-label: "Mañana",
-icon: "🌅",
-value: mnn,
-setter: setmnn,
-placeholder: `${(horas && horas[0]) || 7}.${(minutos && minutos[0]) || "00"}`,
-},
-{
-label: "Tarde",
-icon: "☀️",
-value: td,
-setter: settd,
-placeholder: `${(horas && horas[1]) || 13}.${(minutos && minutos[1]) || "00"}`,
-},
-{
-label: "Noche",
-icon: "🌙",
-value: nc,
-setter: setnc,
-placeholder: `${(horas && horas[2]) || 19}.${(minutos && minutos[2]) || "00"}`,
-},
-];
+  async function guardar_hora() {
+    if (mnn && td && nc) {
+      horas = [];
+      minutos = [];
+      horas.push(mnn[0]);
+      minutos.push(mnn[1]);
+      horas.push(td[0]);
+      minutos.push(td[1]);
+      horas.push(nc[0]);
+      minutos.push(nc[1]);
+      await AsyncStorage.setItem("cargar_horas", JSON.stringify(horas));
+      await AsyncStorage.setItem("cargar_minutos", JSON.stringify(minutos));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    }
+  }
 
-function parseHorario(text, setter) {
-let texto = String(text);
-let texto_partido = texto.split("");
-let array_texto_hr = texto.split("", 2);
-let array_texto_min = texto_partido.slice(3);
-setter([
-Number(array_texto_hr.join("")),
-Number(array_texto_min.join("")),
-]);
-}
+  const horarios = [{
+    label: "Mañana",
+    icon: "🌅",
+    value: mnn,
+    setter: setmnn,
+    placeholder: `${(horas && horas[0]) || 7}.${(minutos && minutos[0]) || "00"}`,
+  },
+    {
+      label: "Tarde",
+      icon: "☀️",
+      value: td,
+      setter: settd,
+      placeholder: `${(horas && horas[1]) || 13}.${(minutos && minutos[1]) || "00"}`,
+    },
+    {
+      label: "Noche",
+      icon: "🌙",
+      value: nc,
+      setter: setnc,
+      placeholder: `${(horas && horas[2]) || 19}.${(minutos && minutos[2]) || "00"}`,
+    },
+  ];
 
-return (
-<ScreenWrapper>
-<ScrollView
-contentContainerStyle={ { padding: 20, paddingBottom: 40 }}
-showsVerticalScrollIndicator={false}
->
-<SectionHeader title="Configuración" subtitle="Ajusta los horarios de recordatorio" />
+  function parseHorario(text, setter) {
+    let texto = String(text);
+    let texto_partido = texto.split("");
+    let array_texto_hr = texto.split("", 2);
+    let array_texto_min = texto_partido.slice(3);
+    setter([
+      Number(array_texto_hr.join("")),
+      Number(array_texto_min.join("")),
+    ]);
+  }
 
-{saved && (
-<View
-style={ {
-backgroundColor: COLORS.successMuted,
-borderWidth: 1,
-borderColor: COLORS.success,
-borderRadius: 8,
-padding: 14,
-marginBottom: 20,
-flexDirection: "row",
-gap: 8,
-alignItems: "center",
-}}
->
-<Text style={ { fontSize: 16 }}>✅</Text>
-<Text style={ { color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
-Horarios guardados correctamente
-</Text>
-</View>
-)}
+  return (
+    <ScreenWrapper>
+      <ScrollView
+        contentContainerStyle={ { padding: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+        >
+        <SectionHeader title="Configuración" subtitle="Ajusta los horarios de recordatorio" />
 
-{/* Horarios card */}
-<View
-style={ {
-backgroundColor: COLORS.card,
-borderRadius: 10,
-borderWidth: 1,
-borderColor: COLORS.border,
-padding: 20,
-marginBottom: 24,
-}}
->
-<Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 20 }}>
-HORARIOS DE NOTIFICACIÓN
-</Text>
-<Text style={ { color: COLORS.textMuted, fontSize: 12, marginBottom: 20, lineHeight: 18 }}>
-Ingresa el horario en formato{" "}
-<Text style={ { color: COLORS.accent, ...FONTS.mono }}>HH.MM</Text> — por ejemplo{" "}
-<Text style={ { color: COLORS.accent, ...FONTS.mono }}>7.30</Text> para las 7:30 AM.
-</Text>
+        {saved && (
+          <View
+            style={ {
+              backgroundColor: COLORS.successMuted,
+              borderWidth: 1,
+              borderColor: COLORS.success,
+              borderRadius: 8,
+              padding: 14,
+              marginBottom: 20,
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
+            }}
+            >
+            <Text style={ { fontSize: 16 }}>✅</Text>
+            <Text style={ { color: COLORS.success, fontWeight: "600", fontSize: 13 }}>
+              Horarios guardados correctamente
+            </Text>
+          </View>
+        )}
 
-{horarios.map((item, i) => (
-<View key={item.label} style={ { marginBottom: i < horarios.length - 1 ? 20: 0 }}>
-<View style={ { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-<Text style={ { fontSize: 16 }}>{item.icon}</Text>
-<Text style={ { color: COLORS.text, fontSize: 13, fontWeight: "600" }}>
-{item.label}
-</Text>
-</View>
-<TextInput
-placeholder={`Actual: ${item.placeholder}`}
-placeholderTextColor={COLORS.textMuted}
-value={
-Array.isArray(item.value) && item.value.length > 0
-? `${item.value[0]}.${String(item.value[1]).padStart(2, "0")}`: ""
-}
-maxLength={5}
-keyboardType="numeric"
-onChangeText={(t) => parseHorario(t, item.setter)}
-style={ {
-backgroundColor: COLORS.surface,
-borderWidth: 1,
-borderColor: COLORS.border,
-borderRadius: 6,
-paddingHorizontal: 14,
-paddingVertical: 12,
-color: COLORS.text,
-fontSize: 14,
-...FONTS.mono,
-}}
-/>
-</View>
-))}
-</View>
+        {/* Horarios card */}
+        <View
+          style={ {
+            backgroundColor: COLORS.card,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            padding: 20,
+            marginBottom: 24,
+          }}
+          >
+          <Text style={ { color: COLORS.textSecondary, fontSize: 11, fontWeight: "700", letterSpacing: 0.8, marginBottom: 20 }}>
+            HORARIOS DE NOTIFICACIÓN
+          </Text>
+          <Text style={ { color: COLORS.textMuted, fontSize: 12, marginBottom: 20, lineHeight: 18 }}>
+            Ingresa el horario en formato{" "}
+            <Text style={ { color: COLORS.accent, ...FONTS.mono }}>HH.MM</Text> — por ejemplo{" "}
+            <Text style={ { color: COLORS.accent, ...FONTS.mono }}>7.30</Text> para las 7:30 AM.
+          </Text>
 
-{/* Info card */}
-<View
-style={ {
-backgroundColor: COLORS.accentMuted,
-borderRadius: 8,
-borderWidth: 1,
-borderColor: COLORS.accentSoft,
-padding: 16,
-flexDirection: "row",
-gap: 12,
-marginBottom: 24,
-}}
->
-<Text style={ { fontSize: 18 }}>ℹ️</Text>
-<View style={ { flex: 1 }}>
-<Text style={ { color: COLORS.accent, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>
-NOTA IMPORTANTE
-</Text>
-<Text style={ { color: COLORS.textSecondary, fontSize: 12, lineHeight: 18 }}>
-Los cambios de horario solo afectan a las tareas creadas desde este momento en adelante.
-Las notificaciones existentes mantienen su horario original.
-</Text>
-</View>
-</View>
+          {horarios.map((item, i) => (
+            <View key={item.label} style={ { marginBottom: i < horarios.length - 1 ? 20: 0 }}>
+              <View style={ { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Text style={ { fontSize: 16 }}>{item.icon}</Text>
+                <Text style={ { color: COLORS.text, fontSize: 13, fontWeight: "600" }}>
+                  {item.label}
+                </Text>
+              </View>
+              <TextInput
+                placeholder={`Actual: ${item.placeholder}`}
+                placeholderTextColor={COLORS.textMuted}
+                value={
+                Array.isArray(item.value) && item.value.length > 0
+                ? `${item.value[0]}.${String(item.value[1]).padStart(2, "0")}`: ""
+                }
+                maxLength={5}
+                keyboardType="numeric"
+                onChangeText={(t) => parseHorario(t, item.setter)}
+                style={ {
+                  backgroundColor: COLORS.surface,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  borderRadius: 6,
+                  paddingHorizontal: 14,
+                  paddingVertical: 12,
+                  color: COLORS.text,
+                  fontSize: 14,
+                  ...FONTS.mono,
+                }}
+                />
+            </View>
+          ))}
+        </View>
 
-<PrimaryButton onPress={guardar_hora} icon="💾">
-Guardar Horarios
-</PrimaryButton>
-<Divider style={ { marginVertical: 32 }} />
-<View style={ { flexDirection: "row", columnGap: 800, flex: 1, display: "flex", justifyContent: "center" }}>
-<PrimaryButton onPress={() => { ExportarStack }} style={ { width: 200 }} icon="📤">
-Exportar Tareas
-</PrimaryButton>
-<PrimaryButton onPress={() => { ImportarStack }} style={ { width: 200 }} icon="📥">
-Importar Tareas
-</PrimaryButton>
-</View>
-</ScrollView>
-</ScreenWrapper>
-);
+        {/* Info card */}
+        <View
+          style={ {
+            backgroundColor: COLORS.accentMuted,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: COLORS.accentSoft,
+            padding: 16,
+            flexDirection: "row",
+            gap: 12,
+            marginBottom: 24,
+          }}
+          >
+          <Text style={ { fontSize: 18 }}>ℹ️</Text>
+          <View style={ { flex: 1 }}>
+            <Text style={ { color: COLORS.accent, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>
+              NOTA IMPORTANTE
+            </Text>
+            <Text style={ { color: COLORS.textSecondary, fontSize: 12, lineHeight: 18 }}>
+              Los cambios de horario solo afectan a las tareas creadas desde este momento en adelante.
+              Las notificaciones existentes mantienen su horario original.
+            </Text>
+          </View>
+        </View>
+
+        <PrimaryButton onPress={guardar_hora} icon="💾">
+          Guardar Horarios
+        </PrimaryButton>
+        <Divider style={ { marginVertical: 32 }} />
+        <View style={ { flexDirection: "row", columnGap: 800, flex: 1, display: "flex", justifyContent: "center" }}>
+          <PrimaryButton onPress={() => { ExportarStack }} style={ { width: 200 }} icon="📤">
+            Exportar Tareas
+          </PrimaryButton>
+          <PrimaryButton onPress={() => { ImportarStack }} style={ { width: 200 }} icon="📥">
+            Importar Tareas
+          </PrimaryButton>
+        </View>
+      </ScrollView>
+    </ScreenWrapper>
+  );
 }
 
 export {
-Inicio,
-Crear_tareas,
-Opciones
+  Inicio,
+  Crear_tareas,
+  Opciones
 };
