@@ -865,8 +865,7 @@ function Opciones() {
         <PrimaryButton onPress={guardar_hora} icon="💾">
           Guardar Horarios
         </PrimaryButton>
-        <Divider style={{ marginVertical: 32 }} />
-        <View style={{ flexDirection: "row", columnGap: 800, flex: 1, display: "flex", justifyContent: "center" }}>
+        <View style={{ marginVertical: 20, flexDirection: "column", rowGap: 10, flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
           <PrimaryButton onPress={ExportarStack} style={{ width: 200 }} icon="📤">
             Exportar Tareas
           </PrimaryButton>
