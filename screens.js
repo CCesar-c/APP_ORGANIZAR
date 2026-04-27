@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import * as Filesystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import {
   Platform
 } from "react-native";
@@ -14,7 +14,8 @@ const Notifications =
   Platform.OS !== "web" ? require("expo-notifications") : null;
 
 import { Alert, Linking } from "react-native";
-import {remoteConfig, initializeApp } from "@react-native-firebase/remote-config";
+import firebase from '@react-native-firebase/app';
+import remoteConfig from "@react-native-firebase/remote-config";
 import Constants from "expo-constants";
 import {
   Divider,
@@ -43,13 +44,29 @@ var minutos;
 
 // ─── PANTALLA: INICIO ─────────────────────────────────────────────────────────
 function Inicio() {
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCUQOjEmcGB-F-5YvKq-z5VqQicDMV_sRY",
+    authDomain: "://firebaseapp.com",
+    // IMPORTANTE: Substitua pela URL que aparece no seu console do Firebase
+    databaseURL: "https://firebaseio.com",
+    projectId: "app-organizar",
+    storageBucket: "app-organizar.firebasestorage.app",
+    messagingSenderId: "381482823997",
+    appId: "1:381482823997:android:804a3dd0984fe4d8ee9554"
+  };
+
+  // Inicialize o Firebase ANTES de qualquer outro código que o use
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
   const [datos,
     setdatos] = useState([]);
   const [stats,
     setStats] = useState({
       total: 0, completed: 0
     });
-
   const checkVersion = async () => {
     // 1. Sincronizar Firebase
     await remoteConfig().fetchAndActivate();
@@ -664,7 +681,7 @@ function Opciones() {
       const stacks = await AsyncStorage.getItem("stacks") || "[]";
       const {
         StorageAccessFramework
-      } = Filesystem;
+      } = FileSystem;
 
       // Solicitar al usuario que elija una carpeta para guardar
       const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
@@ -678,8 +695,8 @@ function Opciones() {
         );
 
         // Escribir los datos en el nuevo archivo
-        await Filesystem.writeAsStringAsync(fileUri, stacks, {
-          encoding: Filesystem.EncodingType.UTF8,
+        await FileSystem.writeAsStringAsync(fileUri, stacks, {
+          encoding: FileSystem.EncodingType.UTF8,
         });
 
         alert("Éxito \n Copia de seguridad guardada correctamente.");
@@ -687,7 +704,7 @@ function Opciones() {
         alert("Permiso denegado \n No se pudo guardar el archivo.");
       }
     } catch (error) {
-      console.error("Error al exportar: "+ error);
+      console.error("Error al exportar: " + error);
       alert("Error \n Hubo un problema al exportar.");
     }
   };
@@ -696,7 +713,7 @@ function Opciones() {
     try {
       const {
         StorageAccessFramework
-      } = Filesystem;
+      } = FileSystem;
 
       // Pedir permiso para acceder a la carpeta donde está el backup
       const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
@@ -712,8 +729,8 @@ function Opciones() {
         }
 
         // Leer el contenido del archivo
-        const fileContent = await Filesystem.readAsStringAsync(backupFile, {
-          encoding: Filesystem.EncodingType.UTF8,
+        const fileContent = await FileSystem.readAsStringAsync(backupFile, {
+          encoding: FileSystem.EncodingType.UTF8,
         });
 
         // Guardar en AsyncStorage
@@ -721,7 +738,7 @@ function Opciones() {
         alert("Éxito \n Datos importados correctamente.");
       }
     } catch (error) {
-      console.error("Error al importar: "+ error);
+      console.error("Error al importar: " + error);
       alert("Error \n No se pudo leer el archivo.");
     }
   };
