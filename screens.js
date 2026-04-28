@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import * as Filesystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+
 import {
   Platform
 } from "react-native";
@@ -165,17 +166,17 @@ function Inicio() {
       novaLista = JSON.parse(todas_tareas);
       console.log(novaLista)
       if (!novaLista) return;
-      novaLista.forEach((t) => {
-        var id_manana_existe = tareas.find((tarea) => tarea.id == t.id_manana);
-        var id_tarde_existe = tareas.find((tarea) => tarea.id == t.id_tarde);
-        var id_noche_existe = tareas.find((tarea) => tarea.id == t.id_noche);
-        if (id_manana_existe != null && id_tarde_existe != null && id_noche_existe != null) {
-          setdatos(novaLista);
-        } else {
-          deleteItem(novaLista.indexOf(t), t.id_manana, t.id_tarde, t.id_noche)
-        }
-      })
-
+      // novaLista.forEach((t) => {
+      //   var id_manana_existe = tareas.find((tarea) => tarea.id == t.id_manana);
+      //   var id_tarde_existe = tareas.find((tarea) => tarea.id == t.id_tarde);
+      //   var id_noche_existe = tareas.find((tarea) => tarea.id == t.id_noche);
+      //   if (id_manana_existe != null && id_tarde_existe != null && id_noche_existe != null) {
+      //     setdatos(novaLista);
+      //   } else {
+      //     deleteItem(novaLista.indexOf(t), t.id_manana, t.id_tarde, t.id_noche)
+      //   }
+      // })
+      setdatos(novaLista);
 
 
       setStats({
@@ -195,16 +196,14 @@ function Inicio() {
 
   async function deleteItem(i, id_manana, id_tarde, id_noche) {
     try {
+      const list = [...datos];
 
       id_manana != null ? await Notifications.cancelScheduledNotificationAsync(id_manana) : null;
       id_tarde != null ? await Notifications.cancelScheduledNotificationAsync(id_tarde) : null;
       id_noche != null ? await Notifications.cancelScheduledNotificationAsync(id_noche) : null;
 
       console.log("id_manana: " + id_manana + "\n" + "id_tarde: " + id_tarde + "\n" + "id_noche: " + id_noche)
-
-      const list = [...datos];
-      list.splice(i, 1);
-      setdatos(list);
+      console.log("list: " + list)
       if (list[i].feita == true) {
         const filtado_check_delete = list.filter((t) => t.feita).length - 1
         setStats({
@@ -213,6 +212,10 @@ function Inicio() {
         });
       }
 
+      setdatos(list);
+
+
+      list.splice(i, 1);
       await AsyncStorage.setItem("stacks", JSON.stringify(list));
     } catch (e) {
       console.error(e)
@@ -717,70 +720,44 @@ function Crear_tareas() {
 
 // ─── PANTALLA: OPCIONES ───────────────────────────────────────────────────────
 function Opciones() {
+  const fileName = "backup_stacks.json";
+  const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+
   const ExportarStack = async () => {
     try {
       const stacks = await AsyncStorage.getItem("stacks") || "[]";
-      const {
-        StorageAccessFramework
-      } = Filesystem;
 
-      // Solicitar al usuario que elija una carpeta para guardar
-      const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+      // Escreve direto na pasta interna do app (não pede permissão)
+      await FileSystem.writeAsStringAsync(fileUri, stacks, {
+        encoding: "utf8", // Use a string direta em vez de FileSystem.EncodingType.UTF8
+      });
 
-      if (permissions.granted) {
-        // Crear el archivo en la carpeta seleccionada
-        const fileUri = await StorageAccessFramework.createFileAsync(
-          permissions.directoryUri,
-          'backup.json',
-          'application/json'
-        );
-
-        // Escribir los datos en el nuevo archivo
-        await Filesystem.writeAsStringAsync(fileUri, stacks, {
-          encoding: Filesystem.EncodingType.UTF8,
-        });
-
-        alert("Éxito", "Copia de seguridad guardada correctamente.");
-      } else {
-        alert("Permiso denegado", "No se pudo guardar el archivo.");
-      }
+      alert("Sucesso \n Backup salvo internamente no app. \n" + stacks);
     } catch (error) {
-      console.error("Error al exportar:", error);
-      alert("Error", "Hubo un problema al exportar.");
+      console.error("Error al exportar:" + error);
+      alert("Error \n Hubo un problema al exportar.");
     }
   };
 
   const ImportarStack = async () => {
     try {
-      const {
-        StorageAccessFramework
-      } = Filesystem;
-
       // Pedir permiso para acceder a la carpeta donde está el backup
-      const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
 
-      if (permissions.granted) {
-        // Listar los archivos de la carpeta para buscar el 'backup.json'
-        const files = await StorageAccessFramework.readDirectoryAsync(permissions.directoryUri);
-        const backupFile = files.find(file => file.includes('backup.json'));
-
-        if (!backupFile) {
-          alert("No encontrado", "No se encontró el archivo backup.json en esta carpeta.");
-          return;
-        }
-
-        // Leer el contenido del archivo
-        const fileContent = await Filesystem.readAsStringAsync(backupFile, {
-          encoding: Filesystem.EncodingType.UTF8,
+      if (fileInfo.exists) {
+        const fileContent = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: "utf8", // Use a string direta aqui também
         });
 
-        // Guardar en AsyncStorage
+
         await AsyncStorage.setItem("stacks", fileContent);
-        alert("Éxito", "Datos importados correctamente.");
+        alert("Sucesso \n Dados restaurados com sucesso." + fileContent);
+      } else {
+        alert("Aviso \n Nenhum arquivo de backup encontrado internamente.");
       }
     } catch (error) {
-      console.error("Error al importar:", error);
-      Alert.alert("Error", "No se pudo leer el archivo.");
+      console.error("Error al importar:" + error);
+      Alert.alert("Error \n No se pudo leer el archivo.");
     }
   };
 
@@ -956,10 +933,10 @@ function Opciones() {
           Guardar Horarios
         </PrimaryButton>
         <View style={{ flexDirection: "row", columnGap: 10, flex: 1, display: "flex", justifyContent: "center", margin: 20 }}>
-          <PrimaryButton onPress={() => { ExportarStack }} style={{ width: 150 }} icon="📤">
+          <PrimaryButton onPress={() => { ExportarStack() }} style={{ width: 150 }} icon="📤">
             Exportar Tareas
           </PrimaryButton>
-          <PrimaryButton onPress={() => { ImportarStack }} style={{ width: 150 }} icon="📥">
+          <PrimaryButton onPress={() => { ImportarStack() }} style={{ width: 150 }} icon="📥">
             Importar Tareas
           </PrimaryButton>
         </View>
