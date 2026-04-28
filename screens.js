@@ -161,9 +161,24 @@ function Inicio() {
       }
       var todas_tareas = await AsyncStorage.getItem("stacks");
       // console.log(todas_tareas)
-      var novaLista = JSON.parse(todas_tareas);
+      var novaLista = Array([]);
+      novaLista = JSON.parse(todas_tareas);
+      console.log(novaLista)
       if (!novaLista) return;
-      setdatos(novaLista);
+      novaLista.forEach(async(t) => {
+        const tareas = await Notifications.getAllScheduledNotificationsAsync()
+        var id_manana_existe = tareas.find((tarea) => tarea.id == t.id_manana);
+        var id_tarde_existe = tareas.find((tarea) => tarea.id == t.id_tarde);
+        var id_noche_existe = tareas.find((tarea) => tarea.id == t.id_noche);
+        if (id_manana_existe != null && id_tarde_existe != null && id_noche_existe != null) {
+          setdatos(novaLista);
+        }else{
+          deleteItem(novaLista.indexOf(t), t.id_manana, t.id_tarde, t.id_noche)
+        }
+      })
+
+
+
       setStats({
         total: novaLista.length,
         completed: novaLista.filter((t) => t.feita).length,
@@ -941,12 +956,11 @@ function Opciones() {
         <PrimaryButton onPress={guardar_hora} icon="💾">
           Guardar Horarios
         </PrimaryButton>
-        <Divider style={{ marginVertical: 32 }} />
-        <View style={{ flexDirection: "row", columnGap: 800, flex: 1, display: "flex", justifyContent: "center" }}>
-          <PrimaryButton onPress={() => { ExportarStack }} style={{ width: 200 }} icon="📤">
+        <View style={{ flexDirection: "row", columnGap: 10, flex: 1, display: "flex", justifyContent: "center", margin: 20 }}>
+          <PrimaryButton onPress={() => { ExportarStack }} style={{ width: 150 }} icon="📤">
             Exportar Tareas
           </PrimaryButton>
-          <PrimaryButton onPress={() => { ImportarStack }} style={{ width: 200 }} icon="📥">
+          <PrimaryButton onPress={() => { ImportarStack }} style={{ width: 150 }} icon="📥">
             Importar Tareas
           </PrimaryButton>
         </View>
