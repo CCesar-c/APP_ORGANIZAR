@@ -143,7 +143,7 @@ function Inicio() {
 
   const obtenerTareas = async () => {
     try {
-      //await Notifications.cancelAllScheduledNotificationsAsync();
+      const tareas = await Notifications.getAllScheduledNotificationsAsync()
       if (Platform.OS == "android") {
         console.log(await Notifications.getAllScheduledNotificationsAsync())
       }
@@ -165,14 +165,13 @@ function Inicio() {
       novaLista = JSON.parse(todas_tareas);
       console.log(novaLista)
       if (!novaLista) return;
-      novaLista.forEach(async(t) => {
-        const tareas = await Notifications.getAllScheduledNotificationsAsync()
+      novaLista.forEach((t) => {
         var id_manana_existe = tareas.find((tarea) => tarea.id == t.id_manana);
         var id_tarde_existe = tareas.find((tarea) => tarea.id == t.id_tarde);
         var id_noche_existe = tareas.find((tarea) => tarea.id == t.id_noche);
         if (id_manana_existe != null && id_tarde_existe != null && id_noche_existe != null) {
           setdatos(novaLista);
-        }else{
+        } else {
           deleteItem(novaLista.indexOf(t), t.id_manana, t.id_tarde, t.id_noche)
         }
       })
