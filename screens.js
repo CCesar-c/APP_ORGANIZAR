@@ -462,72 +462,6 @@ function Crear_tareas() {
         if (mnn == false && td == false && nc == false) {
           alert("No colacaste que horario va a tocar la alarmar");
         }
-        var id_mnn = ""
-        var id_td = ""
-        var id_nc = ""
-
-        if (mnn == true) {
-          id_mnn = await Notifications.scheduleNotificationAsync({
-            content: {
-              title: "¡Oye! Tarea Diaria matutina",
-              body: `Es hora de: ${nome}`,
-              android: {
-                channelId: "tareas-canal",
-                sound: true,
-                priority: Notifications.AndroidImportance.MAX,
-              },
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DAILY,
-              hour: horas[0],
-              minute: minutos[0],
-              repeats: true,
-            },
-          });
-        }
-        if (td == true) {
-          id_td = await Notifications.scheduleNotificationAsync({
-            content: {
-              title: "¡Oye! Tarea Diaria vespertina",
-              body: `Es hora de: ${nome}`,
-              android: {
-                channelId: "tareas-canal",
-                sound: true,
-                priority: Notifications.AndroidImportance.MAX,
-              },
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DAILY,
-              hour: horas[1],
-              minute: minutos[1],
-              repeats: true,
-            },
-          });
-        }
-        if (nc == true) {
-          id_nc = await Notifications.scheduleNotificationAsync({
-            content: {
-              title: "¡Oye! Tarea Diaria nocturna",
-              body: `Es hora de: ${nome}`,
-              android: {
-                channelId: "tareas-canal",
-                sound: true,
-                priority: Notifications.AndroidImportance.MAX,
-              },
-            },
-            trigger: {
-              type: Notifications.SchedulableTriggerInputTypes.DAILY,
-              hour: horas[2],
-              minute: minutos[2],
-              repeats: true,
-            },
-          });
-        }
-
-        console.log("id manana " + id_mnn)
-        console.log("id tarde " + id_td)
-        console.log("id noche " + id_nc)
-
         const nueva_tarea = {
           nome: nome,
           descripcion: descripcion,
@@ -565,9 +499,6 @@ function Crear_tareas() {
 
       setnome("");
       setdescripcion("");
-      setmnn(false);
-      settd(false);
-      setnc(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
@@ -720,6 +651,60 @@ function Crear_tareas() {
 
 // ─── PANTALLA: OPCIONES ───────────────────────────────────────────────────────
 function Opciones() {
+
+  // await Notifications.scheduleNotificationAsync({
+  //   content: {
+  //     title: "¡Oye! Tarea Diaria matutina",
+  //     body: `Es hora de hacer las cosas de la manana`,
+  //     android: {
+  //       channelId: "tareas-canal",
+  //       sound: true,
+  //       priority: Notifications.AndroidImportance.MAX,
+  //     },
+  //   },
+  //   trigger: {
+  //     type: Notifications.SchedulableTriggerInputTypes.DAILY,
+  //     hour: horas[0],
+  //     minute: minutos[0],
+  //     repeats: true,
+  //   },
+  // });
+
+  // await Notifications.scheduleNotificationAsync({
+  //   content: {
+  //     title: "¡Oye! Tarea Diaria vespertina",
+  //     body: `Es hora de hacer las cosas de la tarde`,
+  //     android: {
+  //       channelId: "tareas-canal",
+  //       sound: true,
+  //       priority: Notifications.AndroidImportance.MAX,
+  //     },
+  //   },
+  //   trigger: {
+  //     type: Notifications.SchedulableTriggerInputTypes.DAILY,
+  //     hour: horas[1],
+  //     minute: minutos[1],
+  //     repeats: true,
+  //   },
+  // });
+  // await Notifications.scheduleNotificationAsync({
+  //   content: {
+  //     title: "¡Oye! Tarea Diaria nocturna",
+  //     body: `Es hora de hacer las cosas de la noche`,
+  //     android: {
+  //       channelId: "tareas-canal",
+  //       sound: true,
+  //       priority: Notifications.AndroidImportance.MAX,
+  //     },
+  //   },
+  //   trigger: {
+  //     type: Notifications.SchedulableTriggerInputTypes.DAILY,
+  //     hour: horas[2],
+  //     minute: minutos[2],
+  //     repeats: true,
+  //   },
+  // });
+
   const fileName = "backup_stacks.json";
   const fileUri = `${FileSystem.documentDirectory}${fileName}`;
 
