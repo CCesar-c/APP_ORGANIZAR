@@ -944,9 +944,40 @@ function Opciones() {
     </ScreenWrapper>
   );
 }
-
+function Gestor(){
+  const notyAll = async function () {
+     let notiAll =  await Notifications.getAllScheduledNotificationsAsync()
+     return notiAll
+  }
+  return(
+    <ScreenWrapper>
+      <ScrollView>
+        <View>
+          {notyAll.map((nt, i) =>(
+            
+            <View
+            key={i}
+            style={{
+              backgroundColor: item.feita ? COLORS.surface : COLORS.card,
+              borderWidth: 1,
+              borderColor: item.feita ? COLORS.border : COLORS.accentSoft,
+              borderRadius: 8,
+              padding: 14,
+              marginBottom: 10,
+              opacity: item.feita ? 0.65 : 1,
+            }}>
+              {nt.content}
+            </View>
+            
+          ))}
+        </View>
+      </ScrollView>
+    </ScreenWrapper>
+    )
+}
 export {
   Inicio,
   Crear_tareas,
-  Opciones
+  Opciones,
+  Gestor
 };
