@@ -144,10 +144,10 @@ function Inicio() {
 
   const obtenerTareas = async () => {
     try {
-      const tareas = await Notifications.getAllScheduledNotificationsAsync()
-      if (Platform.OS == "android") {
-        console.log(await Notifications.getAllScheduledNotificationsAsync())
-      }
+      // const tareas = await Notifications.getAllScheduledNotificationsAsync()
+      // if (Platform.OS == "android") {
+      //   console.log(await Notifications.getAllScheduledNotificationsAsync())
+      // }
       const cargar_horas = JSON.parse(await AsyncStorage.getItem("cargar_horas"));
       const cargar_minutos = JSON.parse(await AsyncStorage.getItem("cargar_minutos"));
       horas = cargar_horas;
@@ -164,7 +164,7 @@ function Inicio() {
       // console.log(todas_tareas)
       var novaLista = Array([]);
       novaLista = JSON.parse(todas_tareas);
-      console.log(novaLista)
+      // console.log(novaLista)
       if (!novaLista) return;
       // novaLista.forEach((t) => {
       //   var id_manana_existe = tareas.find((tarea) => tarea.id == t.id_manana);
@@ -944,36 +944,40 @@ function Opciones() {
     </ScreenWrapper>
   );
 }
-function Gestor(){
-  const notyAll = async function () {
-     let notiAll =  await Notifications.getAllScheduledNotificationsAsync()
-     return notiAll
+function Gestor() {
+  var notificaciones = []
+  const notyAll = async () => {
+    notificaciones = await Notifications.getAllScheduledNotificationsAsync()
+    console.log(notificaciones)
   }
-  return(
+  useEffect(() => {
+    notyAll()
+  }, [])
+  return (
     <ScreenWrapper>
       <ScrollView>
         <View>
-          {notyAll.map((nt, i) =>(
-            
+          {notificaciones.map((nt, i) => (
+
             <View
-            key={i}
-            style={{
-              backgroundColor: item.feita ? COLORS.surface : COLORS.card,
-              borderWidth: 1,
-              borderColor: item.feita ? COLORS.border : COLORS.accentSoft,
-              borderRadius: 8,
-              padding: 14,
-              marginBottom: 10,
-              opacity: item.feita ? 0.65 : 1,
-            }}>
-              {nt.content}
+              key={i}
+              style={{
+                backgroundColor: item.feita ? COLORS.surface : COLORS.card,
+                borderWidth: 1,
+                borderColor: item.feita ? COLORS.border : COLORS.accentSoft,
+                borderRadius: 8,
+                padding: 14,
+                marginBottom: 10,
+                opacity: item.feita ? 0.65 : 1,
+              }}>
+              <Text>{"nt.content.body"}</Text>
             </View>
-            
+
           ))}
         </View>
       </ScrollView>
     </ScreenWrapper>
-    )
+  )
 }
 export {
   Inicio,

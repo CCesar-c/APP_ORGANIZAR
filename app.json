@@ -40,7 +40,8 @@
           "supportsOpeningDocumentsInPlace": true,
           "enableFileSharing": true
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "owner": "cesar_colmenarez",
     "runtimeVersion": {
