@@ -87,60 +87,62 @@ function Inicio() {
       total: 0, completed: 0
     });
 
-  const checkVersion = async () => {
-    // 1. Sincronizar Firebase
-    await remoteConfig().fetchAndActivate();
+  if (Platform.OS == "android") {
+    const checkVersion = async () => {
+      // 1. Sincronizar Firebase
+      await remoteConfig().fetchAndActivate();
 
-    const minVersion = remoteConfig().getValue('min_version').asString();
-    const downloadUrl = remoteConfig().getValue('url_last_version').asString();
-    const currentVersion = Constants.expoConfig.version;
+      const minVersion = remoteConfig().getValue('min_version').asString();
+      const downloadUrl = remoteConfig().getValue('url_last_version').asString();
+      const currentVersion = Constants.expoConfig.version;
 
-    // 2. Comparar versiones (Lógica simple)
-    if (currentVersion < minVersion) {
-      Alert.alert(
-        "Actualización Obligatoria",
-        "Tu versión es antigua. Descarga la nueva para continuar.",
-        [{
-          text: "Descargar", onPress: () => Linking.openURL(downloadUrl)
-        }],
-        {
-          cancelable: false
-        } // No deja cerrar el aviso
-      );
-    }
-  };
-  const solicitarPermisos = async () => {
-    // 1. Verificamos si ya tenemos permiso
-    const {
-      status: existingStatus
-    } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    // 2. Si no tenemos permiso, lo pedimos
-    if (existingStatus !== 'granted') {
-      const {
-        status
-      } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    // 3. Si el usuario dijo que NO, avisamos que la app no funcionará igual
-    if (finalStatus !== 'granted') {
-      throw new Error("Sin permisos el app no funciona");
+      // 2. Comparar versiones (Lógica simple)
+      if (currentVersion < minVersion) {
+        Alert.alert(
+          "Actualización Obligatoria",
+          "Tu versión es antigua. Descarga la nueva para continuar.",
+          [{
+            text: "Descargar", onPress: () => Linking.openURL(downloadUrl)
+          }],
+          {
+            cancelable: false
+          } // No deja cerrar el aviso
+        );
+      }
     };
-    // alert("el app no funcionara igual porfavor, active las Notifications del este app")
-    // BackHandler.exitApp();
+    const solicitarPermisos = async () => {
+      // 1. Verificamos si ya tenemos permiso
+      const {
+        status: existingStatus
+      } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
 
-    // 4. Configuración extra para Android (Canales)
-    if (Platform.OS === 'android') {
-      Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  };
+      // 2. Si no tenemos permiso, lo pedimos
+      if (existingStatus !== 'granted') {
+        const {
+          status
+        } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      // 3. Si el usuario dijo que NO, avisamos que la app no funcionará igual
+      if (finalStatus !== 'granted') {
+        throw new Error("Sin permisos el app no funciona");
+      };
+      // alert("el app no funcionara igual porfavor, active las Notifications del este app")
+      // BackHandler.exitApp();
+
+      // 4. Configuración extra para Android (Canales)
+      if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+          name: 'default',
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF231F7C',
+        });
+      }
+    };
+  }
 
   const obtenerTareas = async () => {
     try {
@@ -189,8 +191,10 @@ function Inicio() {
   };
 
   useEffect(() => {
-    checkVersion();
-    solicitarPermisos()
+    if (Platform.OS == "android") {
+      checkVersion();
+      solicitarPermisos()
+    }
     obtenerTareas();
   }, []);
 
@@ -551,9 +555,10 @@ function Crear_tareas() {
 
       } else {
         // Web/iOS fallback — save without notifications
+
         const nueva_tarea = {
-          nome,
-          descripcion,
+          nome: nome,
+          descripcion: descripcion,
           fecha: new Date().toLocaleDateString("es-ES"),
           feita: false,
         };
@@ -707,7 +712,7 @@ function Crear_tareas() {
         </View>
 
         <PrimaryButton
-          onPress={guardar_tarea}
+          onPress={() => { guardar_tarea() }}
           icon="＋"
           disabled={!nome.trim() || saving}
         >
@@ -945,35 +950,122 @@ function Opciones() {
   );
 }
 function Gestor() {
-  var notificaciones = []
-  const notyAll = async () => {
-    notificaciones = await Notifications.getAllScheduledNotificationsAsync()
-    console.log(notificaciones)
+  const [render, setRender] = useState([])
+  const [tareas, setTareas] = useState([])
+
+  const llamartareas = async () => {
+    var resultado = []
+    if (Platform.OS == "android") {
+      resultado = await AsyncStorage.getItem("stacks");
+    } else {
+      resultado = [
+        {
+          nome: "Tarea 1",
+          descripcion: "Descripción de la segunda tarea",
+          id_manana: '3913aeb1-88fc-40f4-85e8-00b37a15e76d',
+          id_tarde: '38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad',
+          id_noche: '4fddfb90-37f8-4b3d-8002-f7840a8f8158',
+          fecha: 1,
+          feita: true
+        },
+        {
+          nome: "Tarea 2",
+          descripcion: "Descripción de la tercera tarea",
+          id_manana: 103,
+          id_tarde: 203,
+          id_noche: 303,
+          fecha: 1,
+          feita: false
+        }
+      ];
+    }
+    setTareas(resultado)
+    console.log(resultado)
   }
   useEffect(() => {
+    llamartareas()
     notyAll()
   }, [])
+  const deltearPermanente = async (id) => {
+    await Notifications.cancelScheduledNotificationAsync(id)
+  }
+  const notyAll = async () => {
+    let notificaciones = Platform.OS == "android" ? await Notifications.getAllScheduledNotificationsAsync() :
+      [
+        {
+          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Eleazar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
+          "identifier": "3913aeb1-88fc-40f4-85e8-00b37a15e76d",
+          "trigger": { "channelId": null, "hour": 7, "minute": 0, "type": "daily" }
+        },
+        {
+          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: SIm ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
+          "identifier": "38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad",
+          "trigger": { "channelId": null, "hour": 13, "minute": 0, "type": "daily" }
+        },
+        {
+          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Cesar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
+          "identifier": "4fddfb90-37f8-4b3d-8002-f7840a8f8158",
+          "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" }
+        },
+        {
+          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Fake ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
+          "identifier": "idFake",
+          "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" }
+        }
+      ]
+    setRender(notificaciones)
+    console.log(render)
+  }
+
+  // ... dentro de tu componente Gestor
+
   return (
     <ScreenWrapper>
       <ScrollView>
+        <PrimaryButton onPress={() => llamartareas()} >Reload Async</PrimaryButton>
         <View>
-          {notificaciones.map((nt, i) => (
+          {render.map((nt) => {
+            // 1. Buscar si existe alguna tarea que coincida con este identifier
+            // Esto es más seguro que usar índices fijos o asumir orden
+            const tareaAsociada = tareas.find(t =>
+              t.id_manana === nt.identifier ||
+              t.id_tarde === nt.identifier ||
+              t.id_noche === nt.identifier
+            );
 
-            <View
-              key={i}
-              style={{
-                backgroundColor: item.feita ? COLORS.surface : COLORS.card,
-                borderWidth: 1,
-                borderColor: item.feita ? COLORS.border : COLORS.accentSoft,
-                borderRadius: 8,
-                padding: 14,
-                marginBottom: 10,
-                opacity: item.feita ? 0.65 : 1,
-              }}>
-              <Text>{"nt.content.body"}</Text>
-            </View>
+            // 2. Proteger el renderizado si aún no hay tareas o no hay coincidencia
+            if (!tareas.length) return null; // O un loader
 
-          ))}
+            const mensajeEstado = tareaAsociada
+              ? "Existem uma Tarefa com esta notificaçao"
+              : "Esta notificaçao e fantasma";
+
+            return (
+              <View
+                key={nt.identifier} // Usar identifier como key es más seguro que el índice
+                style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8, backgroundColor: "aliceblue", width: 300, justifyContent: "center", padding: 5, borderRadius: 5, borderWidth: 2, borderColor: "yellow" }}
+              >
+                <View style={{ flex: 1, flexDirection: "row" }}>
+                  <Text
+                    style={{
+                      color: "black",
+                      fontSize: 15,
+                      fontWeight: "600",
+                      ...FONTS.heading,
+                    }}
+                  >
+                    {nt.content.body}{"\n"}{mensajeEstado}
+                  </Text>
+                  <PrimaryButton
+                    style={{ width: 100, borderWidth: 2, borderColor: "red" }} // Corregido 'with' por 'width'
+                    onPress={() => deltearPermanente(nt.identifier)}
+                  >
+                    ❌ Excluir
+                  </PrimaryButton>
+                </View>
+              </View>
+            );
+          })}
         </View>
       </ScrollView>
     </ScreenWrapper>

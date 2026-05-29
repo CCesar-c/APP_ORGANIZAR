@@ -41,7 +41,8 @@
           "enableFileSharing": true
         }
       ],
-      "expo-status-bar"
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
     ],
     "owner": "cesar_colmenarez",
     "runtimeVersion": {
