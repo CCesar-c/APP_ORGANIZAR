@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cesar-colmenarez.APP-ORGANIZAR"
@@ -42,14 +37,17 @@
         }
       ],
       "@react-native-firebase/app",
-      "@react-native-firebase/auth"
+      "@react-native-firebase/auth",
+      "expo-status-bar"
     ],
+
+
     "owner": "cesar_colmenarez",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/d25d1586-883b-470d-9e43-cb2d82ef6da9",
+      "url": "https://expo.dev",
       "enabled": true,
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0

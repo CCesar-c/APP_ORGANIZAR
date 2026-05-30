@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import * as FileSystem from 'expo-file-system/legacy';
+import * as FileSystem from 'expo-file-system';
 
 import {
   Platform
@@ -142,6 +142,8 @@ function Inicio() {
         });
       }
     };
+      checkVersion();
+      solicitarPermisos()
   }
 
   const obtenerTareas = async () => {
@@ -191,10 +193,6 @@ function Inicio() {
   };
 
   useEffect(() => {
-    if (Platform.OS == "android") {
-      checkVersion();
-      solicitarPermisos()
-    }
     obtenerTareas();
   }, []);
 
@@ -979,7 +977,7 @@ function Gestor() {
         }
       ];
     }
-    setTareas(resultado)
+    setTareas(resultado ? resultado:[])
     console.log(resultado)
   }
   useEffect(() => {
@@ -1026,17 +1024,19 @@ function Gestor() {
         <View>
           {render.map((nt) => {
             // 1. Buscar si existe alguna tarea que coincida con este identifier
-            // Esto es más seguro que usar índices fijos o asumir orden
-            const tareaAsociada = tareas.find(t =>
-              t.id_manana === nt.identifier ||
-              t.id_tarde === nt.identifier ||
-              t.id_noche === nt.identifier
-            );
-
+	    const tareaAsociada = []';
             // 2. Proteger el renderizado si aún no hay tareas o no hay coincidencia
-            if (!tareas.length) return null; // O un loader
-
-            const mensajeEstado = tareaAsociada
+            if (!tareas.length || tareas == null) {
+		return null; // O un loader
+		}else{
+		            // Esto es más seguro que usar índices fijos o asumir orden
+            	const tareaAsociada = tareas.find(t =>
+              		t.id_manana === nt.identifier ||
+	                t.id_tarde === nt.identifier ||
+          	   	t.id_noche === nt.identifier
+               );
+	    }
+           const mensajeEstado = tareaAsociada
               ? "Existem uma Tarefa com esta notificaçao"
               : "Esta notificaçao e fantasma";
 
