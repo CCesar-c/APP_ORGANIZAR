@@ -947,112 +947,115 @@ function Opciones() {
     </ScreenWrapper>
   );
 }
+
 function Gestor() {
-  const [render, setRender] = useState([])
-  const [tareas, setTareas] = useState([])
-  const [message, setMessage] = useState('')
+  const [render, setRender] = useState([]);
+  const [tareas, setTareas] = useState([]);
 
   const llamartareas = async () => {
-    var resultado = []
-    if (Platform.OS == "android") {
-      resultado = await AsyncStorage.getItem("stacks");
+    let resultado = [];
+    if (Platform.OS === "android") {
+      const jsonValue = await AsyncStorage.getItem("stacks");
+      // AsyncStorage devuelve un string, hay que parsearlo a objeto/array
+      resultado = jsonValue != null ? JSON.parse(jsonValue) : [];
     } else {
       resultado = [
-        {
-          nome: "Tarea 1",
-          descripcion: "Descripción de la segunda tarea",
-          id_manana: '3913aeb1-88fc-40f4-85e8-00b37a15e76d',
-          id_tarde: '38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad',
-          id_noche: '4fddfb90-37f8-4b3d-8002-f7840a8f8158',
-          fecha: 1,
-          feita: true
-        },
-        {
-          nome: "Tarea 2",
-          descripcion: "Descripción de la tercera tarea",
-          id_manana: 103,
-          id_tarde: 203,
-          id_noche: 303,
-          fecha: 1,
-          feita: false
-        }
+        { nome: "Tarea 1", descripcion: "Descripción de la segunda tarea", id_manana: '3913aeb1-88fc-40f4-85e8-00b37a15e76d', id_tarde: '38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad', id_noche: '4fddfb90-37f8-4b3d-8002-f7840a8f8158', fecha: 1, feita: true },
+        { nome: "Tarea 2", descripcion: "Descripción de la tercera tarea", id_manana: 103, id_tarde: 203, id_noche: 303, fecha: 1, feita: false }
       ];
     }
-    setTareas(resultado ? resultado : [])
-    console.log(resultado)
-  }
+    setTareas(resultado);
+  };
 
   const deltearPermanente = async (id) => {
-    await Notifications.cancelScheduledNotificationAsync(id)
-  }
+    await Notifications.cancelScheduledNotificationAsync(id);
+    // Recarga las notificaciones para actualizar la lista en pantalla
+    notyAll();
+  };
+
   const notyAll = async () => {
-    let notificaciones = Platform.OS == "android" ? await Notifications.getAllScheduledNotificationsAsync() :
-      [
-        {
-          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Eleazar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
-          "identifier": "3913aeb1-88fc-40f4-85e8-00b37a15e76d",
-          "trigger": { "channelId": null, "hour": 7, "minute": 0, "type": "daily" }
-        },
-        {
-          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: SIm ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
-          "identifier": "38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad",
-          "trigger": { "channelId": null, "hour": 13, "minute": 0, "type": "daily" }
-        },
-        {
-          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Cesar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
-          "identifier": "4fddfb90-37f8-4b3d-8002-f7840a8f8158",
-          "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" }
-        },
-        {
-          "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Fake ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" },
-          "identifier": "idFake",
-          "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" }
-        }
-      ]
-    setRender(notificaciones)
+    let notificaciones = [];
+    if (Platform.OS === "android") {
+      notificaciones = await Notifications.getAllScheduledNotificationsAsync();
+    } else {
+      notificaciones = [
+        { "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Eleazar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" }, "identifier": "3913aeb1-88fc-40f4-85e8-00b37a15e76d", "trigger": { "channelId": null, "hour": 7, "minute": 0, "type": "daily" } },
+        { "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: SIm ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" }, "identifier": "38e3cbb4-8dcf-4b6e-ab28-c4ab8590a4ad", "trigger": { "channelId": null, "hour": 13, "minute": 0, "type": "daily" } },
+        { "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Cesar ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" }, "identifier": "4fddfb90-37f8-4b3d-8002-f7840a8f8158", "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" } },
+        { "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Fake ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" }, "identifier": "idFake", "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" } }
+      ];
+    }
+    setRender(notificaciones);
+  };
+
+  function renExist(nt) {
+    try {
+      // Busca si el identificador coincide con alguna de las jornadas de las tareas
+      const existe = tareas.find((t) =>
+        t.id_manana === nt.identifier ||
+        t.id_tarde === nt.identifier ||
+        t.id_noche === nt.identifier
+      );
+      
+
+      return existe ? "✅ Vinculada a una tarea" : "❌ Notificación huérfana";
+    } catch (e) {
+      console.log(e);
+      return "⚠️ Error al verificar";
+    }
   }
 
   useEffect(() => {
-    llamartareas()
-    notyAll()
-  }, [])
+    llamartareas();
+    notyAll();
+  }, []);
 
   return (
     <ScreenWrapper>
       <ScrollView>
-        <View>
+        <View style={{ padding: 10, alignItems: "center" }}>
           {render && render.map((nt, i) => {
             return (
               <View
-                key={nt.identifier} // Usar identifier como key es más seguro que el índice
-                style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8, backgroundColor: "aliceblue", width: 300, justifyContent: "center", padding: 5, borderRadius: 5, borderWidth: 2, borderColor: "yellow" }}
+                key={nt.identifier}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 8,
+                  backgroundColor: "aliceblue",
+                  width: 320,
+                  justifyContent: "space-between",
+                  padding: 10,
+                  borderRadius: 5,
+                  borderWidth: 2,
+                  borderColor: "yellow"
+                }}
               >
-                <View style={{ flex: 1, flexDirection: "row" }}>
-                  <Text
-                    style={{
-                      color: "black",
-                      fontSize: 15,
-                      fontWeight: "600",
-                      ...FONTS.heading,
-                    }}
-                  >
-                    {nt.content.body}{"\n"}{tareas.find((t) => t.id_manana === nt.identifier || t.id_tarde === nt.identifier || t.id_noche === nt.identifier) ? "Existe" : "NO EXISTE COMPAS "}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: "black", fontSize: 14, fontWeight: "600", ...FONTS.heading }} >
+                    {nt.content.body}
                   </Text>
-                  <PrimaryButton
-                    style={{ width: 100, borderWidth: 2, borderColor: "red" }} // Corregido 'with' por 'width'
-                    onPress={() => deltearPermanente(nt.identifier)}
-                  >
-                    ❌ Excluir
-                  </PrimaryButton>
+                  <Text style={{ color: "gray", fontSize: 12 }}>
+                    {renExist(nt)}
+                  </Text>
                 </View>
+
+                <PrimaryButton
+                  style={{ width: 90, borderWidth: 2, borderColor: "red", padding: 5 }}
+                  onPress={() => deltearPermanente(nt.identifier)}
+                >
+                  ❌ Excluir
+                </PrimaryButton>
               </View>
             );
           })}
         </View>
       </ScrollView>
     </ScreenWrapper>
-  )
+  );
 }
+
 export {
   Inicio,
   Crear_tareas,
