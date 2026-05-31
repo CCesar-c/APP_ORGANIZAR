@@ -142,8 +142,8 @@ function Inicio() {
         });
       }
     };
-      checkVersion();
-      solicitarPermisos()
+    checkVersion();
+    solicitarPermisos()
   }
 
   const obtenerTareas = async () => {
@@ -950,6 +950,7 @@ function Opciones() {
 function Gestor() {
   const [render, setRender] = useState([])
   const [tareas, setTareas] = useState([])
+  const [message, setMessage] = useState('')
 
   const llamartareas = async () => {
     var resultado = []
@@ -977,13 +978,10 @@ function Gestor() {
         }
       ];
     }
-    setTareas(resultado ? resultado:[])
+    setTareas(resultado ? resultado : [])
     console.log(resultado)
   }
-  useEffect(() => {
-    llamartareas()
-    notyAll()
-  }, [])
+
   const deltearPermanente = async (id) => {
     await Notifications.cancelScheduledNotificationAsync(id)
   }
@@ -1012,34 +1010,18 @@ function Gestor() {
         }
       ]
     setRender(notificaciones)
-    console.log(render)
   }
 
-  // ... dentro de tu componente Gestor
+  useEffect(() => {
+    llamartareas()
+    notyAll()
+  }, [])
 
   return (
     <ScreenWrapper>
       <ScrollView>
-        <PrimaryButton onPress={() => llamartareas()} >Reload Async</PrimaryButton>
         <View>
-          {render.map((nt) => {
-            // 1. Buscar si existe alguna tarea que coincida con este identifier
-	    const tareaAsociada = []';
-            // 2. Proteger el renderizado si aún no hay tareas o no hay coincidencia
-            if (!tareas.length || tareas == null) {
-		return null; // O un loader
-		}else{
-		            // Esto es más seguro que usar índices fijos o asumir orden
-            	const tareaAsociada = tareas.find(t =>
-              		t.id_manana === nt.identifier ||
-	                t.id_tarde === nt.identifier ||
-          	   	t.id_noche === nt.identifier
-               );
-	    }
-           const mensajeEstado = tareaAsociada
-              ? "Existem uma Tarefa com esta notificaçao"
-              : "Esta notificaçao e fantasma";
-
+          {render && render.map((nt, i) => {
             return (
               <View
                 key={nt.identifier} // Usar identifier como key es más seguro que el índice
@@ -1054,7 +1036,7 @@ function Gestor() {
                       ...FONTS.heading,
                     }}
                   >
-                    {nt.content.body}{"\n"}{mensajeEstado}
+                    {nt.content.body}{"\n"}{tareas.find((t) => t.id_manana === nt.identifier || t.id_tarde === nt.identifier || t.id_noche === nt.identifier) ? "Existe" : "NO EXISTE COMPAS "}
                   </Text>
                   <PrimaryButton
                     style={{ width: 100, borderWidth: 2, borderColor: "red" }} // Corregido 'with' por 'width'
