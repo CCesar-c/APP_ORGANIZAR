@@ -996,7 +996,7 @@ function Gestor() {
         t.id_tarde === nt.identifier ||
         t.id_noche === nt.identifier
       );
-      
+
 
       return existe ? "✅ Vinculada a una tarea" : "❌ Notificación huérfana";
     } catch (e) {
@@ -1017,7 +1017,7 @@ function Gestor() {
           {render && render.map((nt, i) => {
             return (
               <View
-                key={nt.identifier}
+                key={i}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -1040,11 +1040,9 @@ function Gestor() {
                     {renExist(nt)}
                   </Text>
                 </View>
-
                 <PrimaryButton
                   style={{ width: 90, borderWidth: 2, borderColor: "red", padding: 5 }}
-                  onPress={() => deltearPermanente(nt.identifier)}
-                >
+                  onPress={() => deltearPermanente(nt.identifier)}>
                   ❌ Excluir
                 </PrimaryButton>
               </View>

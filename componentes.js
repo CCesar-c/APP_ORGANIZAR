@@ -16,9 +16,7 @@ import {
   FONTS
 } from "./estilo";
 
-function Divider({
-  style
-}) {
+function Divider({ style }) {
   return (
     <View
       style={[{ height: 1, backgroundColor: COLORS.border, marginVertical: 4 },
@@ -28,9 +26,7 @@ function Divider({
   );
 }
 
-function Badge({
-  label, variant = "default"
-}) {
+function Badge({  label, variant = "default" }) {
   const variants = {
     default: {
       bg: COLORS.accentMuted,
