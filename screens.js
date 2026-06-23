@@ -1064,19 +1064,29 @@ function FalarIa() {
   const [pregunta, setPregunta] = useState('');
   const [respostia, setRespostai] = useState([]);
   const [recuerdosAnteriores, setRecuerdosAnteriores] = useState(null); // RWKV suele usar null o un objeto de estado
-  
-  const API_URL = Platform.OS === 'android'
-    ? 'http://10.1.157'
-    : 'http://localhost:3000/response-ia';
+
+  //const API_URL = 'https://ngrok-free.dev';
+  // Cambia esto en tu archivo de Expo
+  const API_URL = 'http://localhost:3000/response-ia';
+
   const respons = async () => {
     if (!pregunta.trim()) return; // Evita enviar mensajes vacíos
 
     try {
       // 2. CORREGIDO: Cambiar 'localhost' por tu IP local y añadir '/response-ia'
-      const response = await axios.post(API_URL, {
-        pregunta: pregunta,
-        recuerdosAnteriores: recuerdosAnteriores
-      });
+      const response = await axios.post(
+        API_URL,
+        {
+          pregunta: pregunta,
+          recuerdosAnteriores: recuerdosAnteriores
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true' // <-- INDISPENSABLE para cuentas gratis de Ngrok
+          }
+        }
+      );
 
       // 3. CORREGIDO: Añadir la nueva respuesta al arreglo previo correctamente
       // Guardamos tanto la pregunta del usuario como la respuesta de la IA para el historial
