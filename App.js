@@ -15,7 +15,8 @@ import {
   Inicio,
   Crear_tareas,
   Opciones,
-  Gestor
+  Gestor,
+  FalarIa
 } from "./screens";
 
 const Drawer = createDrawerNavigator();
@@ -44,7 +45,7 @@ function CustomDrawerContent( {
   },
     {
       name: "Crear tareas",
-      icon: "＋",
+      icon: "➕",
       label: "Nueva Tarea"
     },
     {
@@ -56,6 +57,11 @@ function CustomDrawerContent( {
       name: "Gestor",
       icon: "🔧",
       label: "Gestor"
+    },
+    {
+      name: "FalarIa",
+      icon: "🤖",
+      label: "FalarIa"
     }];
 
   return (
@@ -198,6 +204,7 @@ export default function App() {
         <Drawer.Screen name="Crear tareas" component={Crear_tareas} options={ { title: "Nueva Tarea" }} />
         <Drawer.Screen name="Opciones" component={Opciones} options={ { title: "Configuración" }} />
         <Drawer.Screen name="Gestor" component={Gestor} options={ { title: "Gestor" }} />
+        <Drawer.Screen name="FalarIa" component={FalarIa} options={ { title: "FalarIa" }} />
       </Drawer.Navigator>
     </NavigationContainer>
   );

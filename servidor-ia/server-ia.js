@@ -1,5 +1,5 @@
 const express = require('express');
-const { RWKVModel } = require('rwkv-cpp-node');
+const  RWKVModel  = require('rwkv-cpp-node');
 const path = require('path');
 const cors = require('cors');
 
@@ -27,7 +27,7 @@ app.post("/response-ia", (request, response) => {
     response.json({ resposta: resultado });
 })
 
-app.listen(3000, () => {
-    console.log("http://localhost:3000/ aqui esta me back-end");
-
-})
+// CAMBIA ESTO EN TU BACKEND:
+app.listen(3000, "0.0.0.0", () => {
+    console.log("Servidor IA activo en http://0.0.0");
+});

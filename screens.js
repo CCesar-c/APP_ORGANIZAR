@@ -43,6 +43,7 @@ import {
   COLORS,
   FONTS
 } from "./estilo";
+import axios from "axios";
 
 // ─── VARIABLES GLOBALES ───────────────────────────────────────────────────────
 var horas;
@@ -1058,9 +1059,76 @@ function Gestor() {
   );
 }
 
+function FalarIa() {
+  // 1. CORREGIDO: Inicializar los textos como strings '', no como arreglos []
+  const [pregunta, setPregunta] = useState('');
+  const [respostia, setRespostai] = useState([]);
+  const [recuerdosAnteriores, setRecuerdosAnteriores] = useState(null); // RWKV suele usar null o un objeto de estado
+  
+  const API_URL = Platform.OS === 'android'
+    ? 'http://10.1.157'
+    : 'http://localhost:3000/response-ia';
+  const respons = async () => {
+    if (!pregunta.trim()) return; // Evita enviar mensajes vacíos
+
+    try {
+      // 2. CORREGIDO: Cambiar 'localhost' por tu IP local y añadir '/response-ia'
+      const response = await axios.post(API_URL, {
+        pregunta: pregunta,
+        recuerdosAnteriores: recuerdosAnteriores
+      });
+
+      // 3. CORREGIDO: Añadir la nueva respuesta al arreglo previo correctamente
+      // Guardamos tanto la pregunta del usuario como la respuesta de la IA para el historial
+      const nuevoMensaje = {
+        user: pregunta,
+        ia: response.data.respuesta
+      };
+
+      setRespostai(prevRespuestas => [...prevRespuestas, nuevoMensaje]);
+
+      // Limpiamos el campo de texto para la siguiente pregunta
+      setPregunta('');
+
+    } catch (error) {
+      console.error("Error de conexión con el backend:", error);
+    }
+  };
+
+  return (
+    <ScreenWrapper>
+      <ScrollView
+        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View>
+          {/* Mostramos el historial de la conversación de forma ordenada */}
+          {respostia.map((chat, i) => (
+            <View key={i} style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderColor: '#ccc' }}>
+              <Text style={{ fontWeight: 'bold', color: 'blue' }}>Tú: {chat.user}</Text>
+              <Text style={{ marginTop: 5, color: 'black' }}>🤖 IA: {chat.ia}</Text>
+            </View>
+          ))}
+
+          {/* Input para escribir */}
+          <TextInput
+            value={pregunta}
+            onChangeText={setPregunta} // CORREGIDO: Sintaxis limpia para React Native
+            style={{ marginVertical: 10, borderColor: "gray", borderWidth: 1, padding: 10, borderRadius: 5, color: "white" }}
+            placeholder="Escribe tu pregunta..."
+            placeholderTextColor="gray"
+          />
+
+          <PrimaryButton onPress={respons}>enviar</PrimaryButton>
+        </View>
+      </ScrollView>
+    </ScreenWrapper>
+  );
+}
 export {
   Inicio,
   Crear_tareas,
   Opciones,
-  Gestor
+  Gestor,
+  FalarIa
 };
