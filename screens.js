@@ -985,6 +985,10 @@ function Gestor() {
         { "content": { "autoDismiss": true, "badge": null, "body": "Es hora de: Fake ", "sound": "default", "sticky": false, "subtitle": null, "title": "¡Oye! Tarea Diaria" }, "identifier": "idFake", "trigger": { "channelId": null, "hour": 20, "minute": 0, "type": "daily" } }
       ];
     }
+
+    notificaciones.forEach(n => {
+      n.content.body = n.content.body.replace("Es hora de: ", "")
+    })
     setRender(notificaciones);
   };
 
