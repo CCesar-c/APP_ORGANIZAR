@@ -11,7 +11,7 @@ app.use(express.json());
 
 // 2. Inicializamos la API de OpenAI con tu llave secreta
 const openai = new OpenAI({
-    apiKey: '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' // Reemplaza esto con tu llave sk-...
+    apiKey: 'api' // Reemplaza esto con tu llave sk-...
 });
 
 console.log("🤖 ¡Conexión con OpenAI configurada y lista!");
