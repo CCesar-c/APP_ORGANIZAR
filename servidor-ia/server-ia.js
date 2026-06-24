@@ -1,77 +1,61 @@
 const express = require('express');
-const RWKVModel = require('rwkv-cpp-node');
-const path = require('path');
+const cors = require('cors');
+const { OpenAI } = require('openai');
 
 const app = express();
 
-// Middleware de CORS manual (igual al anterior)
-app.use((request, response, next) => {
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (request.method === 'OPTIONS') {
-        return response.sendStatus(200);
-    }
-    next();
-});
+// 1. Interceptor de seguridad manual para CORS (Evita errores de red)
+app.use(cors());
 
 app.use(express.json());
 
-const modelpath = path.join(__dirname, 'modelos/rwkv-7-goose.bin');
+// 2. Inicializamos la API de OpenAI con tu llave secreta
+const openai = new OpenAI({
+    apiKey: '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' // Reemplaza esto con tu llave sk-...
+});
 
-// 1. CORREGIDO: Mapeamos tanto 'modelPath' como 'path' en minúsculas por si la librería usa una variante diferente
-const configIA = { 
-    modelPath: modelpath, 
-    path: modelpath, // Variación común en algunas versiones
-    thread: 4,
-    threads: 4 
-};
-
-const model = new RWKVModel(configIA);
-
-// 2. CORREGIDO: Le pasamos el objeto de configuración directamente a setup() 
-// para que el módulo nativo de archivos no reciba un argumento 'undefined'
-try {
-    console.log("⚙️ Inicializando el contexto de RWKV (llamando a setup)...");
-    
-    // Le enviamos la ruta y los hilos directo al método setup
-    model.setup(configIA); 
-    
-    console.log("🤖 ¡IA RWKV-7 cargada, configurada y lista para recibir preguntas!");
-} catch (error) {
-    console.error("❌ Error grave al ejecutar el setup del binario:", error);
-}
-
+console.log("🤖 ¡Conexión con OpenAI configurada y lista!");
+app.get('/', (req, res) =>{
+    res.send("Hola desdel back-end")
+})
+// 3. Ruta POST para procesar las conversaciones de la App Móvil
 app.post("/response-ia", async (request, response) => {
     try {
-        const { pregunta, recuerdosAnteriores } = request.body;
+        const { pregunta, historialAnterior } = request.body;
 
         if (!pregunta) {
-            return response.status(400).json({ error: "Falta la pregunta" });
+            return response.status(400).json({ error: "Falta la pregunta del usuario." });
         }
 
-        console.log(`Procesando pregunta: "${pregunta}"`);
+        console.log(`Procesando consulta: "${pregunta}"`);
 
-        const resultado = await model.completion({
-            prompt: pregunta,
-            maxTokens: 100,
-            temperature: 0.7,
-            state: recuerdosAnteriores || undefined
+        // Formateamos los mensajes previos más la nueva pregunta para mantener la memoria
+        const mensajesParaIA = [...(historialAnterior || []), { role: 'user', content: pregunta }];
+
+        // Llamamos al modelo más óptimo y económico de OpenAI
+        const apiResponse = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: mensajesParaIA,
+            temperature: 0.7
         });
 
-        const textoRespuesta = typeof resultado === 'object' && resultado.text 
-            ? resultado.text 
-            : resultado;
-
-        console.log(`Respuesta generada con éxito.`);
-        response.json({ respuesta: textoRespuesta });
+        // 🛠️ CORREGIDO: Acceso exacto usando el índice [0] del arreglo choices
+        if (apiResponse && apiResponse.choices && apiResponse.choices[0]) {
+            const respuestaTexto = apiResponse.choices[0].message.content;
+            console.log("Respuesta obtenida con éxito de ChatGPT.");
+            return response.json({ respuesta: respuestaTexto });
+        } else {
+            throw new Error("Estructura de respuesta inesperada de OpenAI");
+        }
 
     } catch (error) {
-        console.error("❌ Error ejecutando la inferencia de la IA:", error);
-        response.status(500).json({ error: "El binario del modelo falló al procesar los tokens.", detalle: error.message });
+        // Imprime el verdadero culpable en la terminal de tu PC
+        console.error("❌ Error real en el Backend:", error.message);
+        response.status(500).json({ error: "Hubo un fallo al procesar la petición con ChatGPT.", detalle: error.message });
     }
 });
 
+// Escuchamos en el puerto 3000 local
 app.listen(3000, "0.0.0.0", () => {
-    console.log("Servidor IA activo en el puerto 3000");
+    console.log("Servidor intermedio activo en el puerto 3000");
 });

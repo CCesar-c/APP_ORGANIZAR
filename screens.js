@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  StyleSheet
 } from "react-native";
 import * as FileSystem from 'expo-file-system';
 
@@ -1060,48 +1061,61 @@ function Gestor() {
 }
 
 function FalarIa() {
-  // 1. CORREGIDO: Inicializar los textos como strings '', no como arreglos []
-  const [pregunta, setPregunta] = useState('');
-  const [respostia, setRespostai] = useState([]);
-  const [recuerdosAnteriores, setRecuerdosAnteriores] = useState(null); // RWKV suele usar null o un objeto de estado
 
-  //const API_URL = 'https://ngrok-free.dev';
-  // Cambia esto en tu archivo de Expo
+  useEffect(() => {
+    const sim = async () => {
+      await axios.get('http://localhost:3000/');
+    }
+  }, [])
   const API_URL = 'http://localhost:3000/response-ia';
 
-  const respons = async () => {
-    if (!pregunta.trim()) return; // Evita enviar mensajes vacíos
+  const [pregunta, setPregunta] = useState('');
+  const [chatLog, setChatLog] = useState([]); // Almacena el historial visual de la pantalla
+  const [historialAPI, setHistorialAPI] = useState([]); // Almacena el formato de memoria que requiere la API [{role, content}]
+  const [cargando, setCargando] = useState(false);
+
+  const consultarBackend = async () => {
+    if (!pregunta.trim() || cargando) return;
+
+    // 1. Pintamos de inmediato el texto del usuario en la interfaz móvil
+    const nuevaInteraccionUsuario = { user: pregunta, ia: '...' };
+    setChatLog(prev => [...prev, nuevaInteraccionUsuario]);
+    setCargando(true);
 
     try {
-      // 2. CORREGIDO: Cambiar 'localhost' por tu IP local y añadir '/response-ia'
-      const response = await axios.post(
-        API_URL,
-        {
-          pregunta: pregunta,
-          recuerdosAnteriores: recuerdosAnteriores
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true' // <-- INDISPENSABLE para cuentas gratis de Ngrok
-          }
-        }
-      );
+      // 2. Enviamos la pregunta y la memoria acumulada a nuestro servidor Node.js
+      const response = await axios.post(API_URL, {
+        pregunta: pregunta,
+        historialAnterior: historialAPI
+      });
 
-      // 3. CORREGIDO: Añadir la nueva respuesta al arreglo previo correctamente
-      // Guardamos tanto la pregunta del usuario como la respuesta de la IA para el historial
-      const nuevoMensaje = {
-        user: pregunta,
-        ia: response.data.respuesta
-      };
+      const respuestaServidor = response.data.respuesta;
 
-      setRespostai(prevRespuestas => [...prevRespuestas, nuevoMensaje]);
+      // 3. Actualizamos la pantalla reemplazando los puntos suspensivos por la respuesta real
+      setChatLog(prev => {
+        const clon = [...prev];
+        clon[clon.length - 1].ia = respuestaServidor;
+        return clon;
+      });
 
-      // Limpiamos el campo de texto para la siguiente pregunta
-      setPregunta('');
+      // 4. Alimentamos la memoria interna para la próxima pregunta
+      setHistorialAPI(prev => [
+        ...prev,
+        { role: 'user', content: pregunta },
+        { role: 'assistant', content: respuestaServidor }
+      ]);
+
+      setPregunta(''); // Limpiamos la caja de texto
 
     } catch (error) {
-      console.error("Error de conexión con el backend:", error);
+      console.error("Error al conectar con tu servidor Node:", error);
+      setChatLog(prev => {
+        const clon = [...prev];
+        clon[clon.length - 1].ia = '❌ Error: El servidor intermedio no respondió.';
+        return clon;
+      });
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -1112,29 +1126,43 @@ function FalarIa() {
         showsVerticalScrollIndicator={false}
       >
         <View>
-          {/* Mostramos el historial de la conversación de forma ordenada */}
-          {respostia.map((chat, i) => (
-            <View key={i} style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderColor: '#ccc' }}>
-              <Text style={{ fontWeight: 'bold', color: 'blue' }}>Tú: {chat.user}</Text>
-              <Text style={{ marginTop: 5, color: 'black' }}>🤖 IA: {chat.ia}</Text>
+          {chatLog.map((chat, i) => (
+            <View key={i} style={styles.chatBlock}>
+              <View style={styles.userBubble}>
+                <Text style={styles.bubbleText}>👤 Tú: {chat.user}</Text>
+              </View>
+              <View style={styles.iaBubble}>
+                <Text style={styles.bubbleText}>🤖 ChatGPT: {chat.ia}</Text>
+              </View>
             </View>
           ))}
 
-          {/* Input para escribir */}
           <TextInput
             value={pregunta}
-            onChangeText={setPregunta} // CORREGIDO: Sintaxis limpia para React Native
-            style={{ marginVertical: 10, borderColor: "gray", borderWidth: 1, padding: 10, borderRadius: 5, color: "white" }}
-            placeholder="Escribe tu pregunta..."
+            onChangeText={setPregunta}
+            style={styles.input}
+            placeholder={cargando ? "Esperando al servidor..." : "Escribe un mensaje..."}
             placeholderTextColor="gray"
+            editable={!cargando}
           />
 
-          <PrimaryButton onPress={respons}>enviar</PrimaryButton>
+          <PrimaryButton onPress={consultarBackend} disabled={cargando}>
+            enviar
+          </PrimaryButton>
         </View>
       </ScrollView>
     </ScreenWrapper>
   );
 }
+
+const styles = StyleSheet.create({
+  chatBlock: { marginVertical: 10 },
+  userBubble: { backgroundColor: '#E3F2FD', padding: 10, borderRadius: 8, alignSelf: 'flex-end', width: '85%', marginBottom: 5 },
+  iaBubble: { backgroundColor: '#F5F5F5', padding: 10, borderRadius: 8, alignSelf: 'flex-start', width: '85%' },
+  bubbleText: { fontSize: 15, color: '#333' },
+  input: { marginVertical: 10, borderColor: "gray", borderWidth: 1, padding: 10, borderRadius: 5, color: "white" }
+});
+
 export {
   Inicio,
   Crear_tareas,
