@@ -21,6 +21,8 @@
       "package": "com.cesar_colmenarez.APP_ORGANIZAR"
     },
     "web": {
+      "budler": "metro",
+      "output": "server",
       "favicon": "./assets/favicon.png"
     },
     "extra": {
@@ -38,10 +40,9 @@
       ],
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-router"
     ],
-
-
     "owner": "cesar_colmenarez",
     "runtimeVersion": {
       "policy": "appVersion"
